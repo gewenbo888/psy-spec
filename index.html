@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Psy Spec · Psy 协议规范</title>
+
+<!-- SEO · GEO -->
+<meta name="description" content="The protocol specification and civilization architecture of Psy Protocol — realms, coordinators, state machine, runtime, networking, SDK, AI-native infrastructure, and civilization-scale coordination." />
+<meta name="keywords" content="Psy Protocol, realms, coordinator, state machine, ZK, Plonky2, Goldilocks, Poseidon, distributed systems, AI native, USDT_P, Psy 协议, 实在层" />
+<meta name="author" content="Gewenbo" />
+<link rel="canonical" href="https://psy-spec.psyverse.fun/" />
+<link rel="alternate" hreflang="en" href="https://psy-spec.psyverse.fun/" />
+<link rel="alternate" hreflang="zh-CN" href="https://psy-spec.psyverse.fun/" />
+<link rel="alternate" hreflang="x-default" href="https://psy-spec.psyverse.fun/" />
+<meta property="og:title" content="Psy Spec" />
+<meta property="og:description" content="Protocol specification and civilization architecture of Psy Protocol — realms, coordinators, state, runtime, SDK, AI-native infrastructure." />
+<meta property="og:url" content="https://psy-spec.psyverse.fun/" />
+<meta property="og:site_name" content="Psyverse" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="zh_CN" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Psy Spec" />
+<meta name="twitter:description" content="The protocol specification and civilization architecture of Psy Protocol." />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#0a0a0c" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "name": "Psy Spec",
+  "alternateName": "Psy 协议规范",
+  "description": "The protocol specification and civilization architecture of Psy Protocol.",
+  "url": "https://psy-spec.psyverse.fun/",
+  "inLanguage": ["en", "zh-CN"],
+  "author": { "@type": "Person", "name": "Gewenbo", "url": "https://psyverse.fun/" },
+  "publisher": { "@type": "Organization", "name": "Psyverse", "url": "https://psyverse.fun/" }
+}
+</script>
+<!-- /SEO · GEO -->
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0c'/><text x='50%' y='58%' text-anchor='middle' dominant-baseline='central' font-family='Cabin Condensed,sans-serif' font-size='22' font-weight='700' fill='%2361f5b3'>ψ</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<script src="https://analytics-dashboard-two-blue.vercel.app/tracker.js" defer></script>
+
+<style>
+:root {
+  --bg-0: #0a0a0c;
+  --bg-1: #101014;
+  --bg-2: #16161c;
+  --bg-3: #1f1f28;
+  --ink-0: #f4f4f8;
+  --ink-1: #d8d8e0;
+  --ink-2: #8e8ea0;
+  --ink-3: #555568;
+  --line: rgba(244, 244, 248, 0.06);
+  --line-strong: rgba(244, 244, 248, 0.14);
+  --mint: #61f5b3;
+  --mint-soft: #8ff8c8;
+  --mint-dim: #2c8a64;
+  --display: 'Cabin Condensed', 'Noto Sans SC', system-ui, sans-serif;
+  --sans: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --max: 1240px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+}
+body.light {
+  --bg-0: #f6f6f8;
+  --bg-1: #ededf0;
+  --bg-2: #e1e1e6;
+  --bg-3: #c8c8d0;
+  --ink-0: #0a0a0c;
+  --ink-1: #1f1f28;
+  --ink-2: #555568;
+  --ink-3: #8e8ea0;
+  --line: rgba(10, 10, 12, 0.08);
+  --line-strong: rgba(10, 10, 12, 0.18);
+  --mint: #1c9c66;
+  --mint-soft: #168558;
+  --mint-dim: #0e6940;
+}
+html[lang="zh"] body { font-family: 'Noto Sans SC', var(--sans); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg-0); color: var(--ink-1);
+  font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--mint); }
+button { font: inherit; color: inherit; cursor: pointer; }
+::selection { background: var(--mint); color: var(--bg-0); }
+
+/* ---------- Top scroll progress ---------- */
+.progress {
+  position: fixed; top: 0; left: 0; height: 1px; width: 0;
+  background: var(--mint);
+  z-index: 100; transition: width 0.1s linear;
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  background: color-mix(in srgb, var(--bg-0) 80%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; align-items: center; gap: 22px;
+  padding: 14px 24px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 600; font-size: 17px; color: var(--ink-0); letter-spacing: 0.01em; }
+.brand .glyph {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  background: var(--bg-1); border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  color: var(--mint); font-family: var(--display); font-weight: 700; font-size: 16px; line-height: 1;
+}
+.brand .ver {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; margin-left: 4px;
+}
+.nav-links { display: flex; gap: 0; flex-wrap: wrap; flex: 1; justify-content: center; font-family: var(--mono); font-size: 11px; }
+.nav-links a {
+  padding: 6px 10px; border-radius: 4px; color: var(--ink-2);
+  letter-spacing: 0.01em;
+  transition: color 0.18s, background 0.18s;
+}
+.nav-links a:hover { color: var(--ink-0); background: color-mix(in srgb, var(--ink-0) 5%, transparent); }
+.lang-switch, .theme-switch {
+  display: flex; border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 2px;
+}
+.lang-switch button, .theme-switch button {
+  background: transparent; border: 0; padding: 4px 9px; border-radius: 3px;
+  color: var(--ink-2); font-size: 11px; font-family: var(--mono); letter-spacing: 0.02em;
+}
+.lang-switch button.active, .theme-switch button.active { background: var(--ink-0); color: var(--bg-0); font-weight: 600; }
+@media (max-width: 1100px) { .nav-links { display: none; } }
+@media (max-width: 540px) { .theme-switch { display: none; } }
+
+section { padding: 96px 24px; position: relative; }
+.wrap { max-width: var(--max); margin: 0 auto; }
+
+/* ---------- Section markers ---------- */
+.sec-num {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+  font-feature-settings: 'tnum';
+}
+.sec-num .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--mint); }
+.sec-num .label { color: var(--ink-2); }
+
+/* ---------- Type ---------- */
+.display, h1.display {
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(40px, 6.5vw, 80px); line-height: 1.0; letter-spacing: -0.015em;
+  color: var(--ink-0); margin: 0 0 22px;
+}
+h2 {
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(28px, 3.5vw, 42px); line-height: 1.08; letter-spacing: -0.012em;
+  color: var(--ink-0); margin: 0 0 16px; max-width: 30ch;
+}
+h3 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--ink-0); margin: 0 0 8px; line-height: 1.3; letter-spacing: -0.005em; }
+h4 { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-2); margin: 0 0 8px; }
+p { color: var(--ink-2); margin: 0 0 14px; }
+.lede { font-size: 17px; color: var(--ink-1); max-width: 70ch; line-height: 1.55; }
+.section-head { max-width: 800px; margin-bottom: 44px; }
+.kbd {
+  font-family: var(--mono); font-size: 12px; color: var(--ink-1);
+  background: var(--bg-2); border: 1px solid var(--line-strong);
+  padding: 1px 6px; border-radius: 3px;
+}
+code, .mono { font-family: var(--mono); font-size: 13px; color: var(--ink-1); }
+pre {
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.55;
+  background: var(--bg-1); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 18px 20px;
+  overflow-x: auto; color: var(--ink-1); margin: 0 0 14px;
+}
+pre .c1 { color: var(--mint); }
+pre .c2 { color: var(--ink-2); }
+pre .c3 { color: #ce9178; }
+pre .com { color: var(--ink-3); }
+
+/* ---------- Hero ---------- */
+.hero { min-height: 88vh; display: grid; place-items: center; padding: 80px 24px 60px; overflow: hidden; }
+.hero-inner { max-width: 1100px; position: relative; z-index: 2; }
+.hero-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 48px; align-items: center; }
+@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 28px; } }
+.hero h1 {
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(46px, 7.5vw, 92px); line-height: 0.96; letter-spacing: -0.025em;
+  color: var(--ink-0); margin: 0 0 20px;
+}
+.hero h1 .accent { color: var(--mint); }
+.hero p.subtitle { font-size: 17px; color: var(--ink-2); max-width: 60ch; margin: 0 0 30px; }
+.cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border-radius: var(--r-sm); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  border: 1px solid transparent; font-family: var(--mono);
+}
+.btn-primary { background: var(--mint); color: var(--bg-0); }
+.btn-primary:hover { background: var(--mint-soft); }
+.btn-ghost { border-color: var(--line-strong); color: var(--ink-1); background: transparent; }
+.btn-ghost:hover { border-color: var(--ink-1); color: var(--ink-0); }
+.btn .arrow { font-family: var(--mono); }
+
+/* ---------- Hero stats / signature mark ---------- */
+.hero-mark {
+  position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; margin-left: auto;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--mint) 4%, transparent), transparent 60%),
+    var(--bg-1);
+  overflow: hidden;
+}
+@media (max-width: 900px) { .hero-mark { display: none; } }
+.hero-mark::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+}
+.hero-mark .psi {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%);
+  font-family: var(--display); font-size: clamp(160px, 30vw, 230px);
+  font-weight: 600; color: var(--mint); line-height: 1;
+}
+.hero-mark .label-row {
+  position: absolute; left: 24px; right: 24px; top: 24px;
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+}
+.hero-mark .meta-row {
+  position: absolute; left: 24px; right: 24px; bottom: 24px;
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-2);
+}
+
+/* ---------- Divider ---------- */
+.divider { height: 1px; max-width: var(--max); margin: 0 auto;
+  background: var(--line); }
+
+/* ---------- TOC strip ---------- */
+.toc {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px; background: var(--line);
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  overflow: hidden;
+}
+.toc a {
+  background: var(--bg-1); padding: 18px 20px;
+  display: block;
+  transition: background 0.18s;
+}
+.toc a:hover { background: var(--bg-2); color: var(--ink-0); }
+.toc .num {
+  font-family: var(--mono); font-size: 11px; color: var(--mint);
+  letter-spacing: 0.04em;
+}
+.toc .ttl {
+  font-family: var(--display); font-weight: 600; font-size: 17px;
+  color: var(--ink-0); margin: 4px 0 4px;
+  letter-spacing: -0.005em;
+}
+.toc .sub {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+}
+
+/* ---------- Architecture map (M1) ---------- */
+.arch-svg-wrap {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  padding: 28px;
+}
+.arch-svg-wrap svg { width: 100%; height: auto; display: block; }
+.arch-node {
+  cursor: pointer; transition: transform 0.18s;
+  transform-origin: center; transform-box: fill-box;
+}
+.arch-node:hover { transform: scale(1.04); }
+.arch-node.active rect { stroke: var(--mint); stroke-width: 1.6; }
+.arch-detail {
+  margin-top: 18px; padding: 22px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  display: grid; grid-template-columns: 1fr 1.6fr; gap: 24px;
+}
+@media (max-width: 700px) { .arch-detail { grid-template-columns: 1fr; gap: 14px; } }
+.arch-detail .pri {
+  font-family: var(--display); font-weight: 600; font-size: 22px; color: var(--ink-0);
+}
+.arch-detail .ports { font-family: var(--mono); font-size: 11.5px; color: var(--mint); margin-top: 6px; }
+.arch-detail .body { font-size: 14px; color: var(--ink-1); }
+
+/* ---------- Realm cards (M2) ---------- */
+.realms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.r-card {
+  padding: 24px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  transition: border-color 0.18s, background 0.18s;
+}
+.r-card:hover { border-color: var(--line-strong); background: var(--bg-2); }
+.r-card .id {
+  font-family: var(--mono); font-size: 11px; color: var(--mint);
+  margin-bottom: 6px;
+}
+.r-card h3 { font-size: 16px; }
+.r-card p { font-size: 13.5px; }
+.r-card .mono-list {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+  display: grid; gap: 4px;
+}
+.r-card .mono-list span { display: flex; justify-content: space-between; gap: 10px; }
+.r-card .mono-list span strong { color: var(--ink-0); font-weight: 500; }
+
+/* ---------- Coordinator responsibilities (M3) ---------- */
+.coord-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.coord-card {
+  padding: 22px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+.coord-card .num {
+  font-family: var(--mono); font-size: 11px; color: var(--mint);
+  margin-bottom: 8px;
+}
+.coord-card h3 { font-size: 16px; }
+.coord-card p { font-size: 13.5px; }
+
+/* ---------- State machine (M4) ---------- */
+.sm-wrap {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1); padding: 28px;
+}
+.sm-wrap svg { width: 100%; height: auto; display: block; }
+.sm-states { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 20px; }
+.sm-state {
+  padding: 16px; border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--bg-2);
+}
+.sm-state .id { font-family: var(--mono); font-size: 11px; color: var(--mint); }
+.sm-state h4 { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--ink-0); text-transform: none; letter-spacing: 0; margin: 4px 0 6px; }
+.sm-state p { font-size: 12.5px; margin: 0; }
+
+/* ---------- Runtime comparison (M5) ---------- */
+.cmp-table {
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  overflow: hidden;
+}
+.cmp-row {
+  display: grid; grid-template-columns: 200px 1fr 1fr;
+  border-bottom: 1px solid var(--line);
+}
+.cmp-row:last-child { border-bottom: 0; }
+.cmp-row > div { padding: 16px 20px; font-size: 13.5px; }
+.cmp-row.head {
+  background: var(--bg-2);
+  font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+}
+.cmp-row.head .left-h { color: var(--mint); }
+.cmp-row .lbl {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  border-right: 1px solid var(--line);
+  display: flex; align-items: center;
+}
+.cmp-row .a { background: color-mix(in srgb, var(--mint) 3%, transparent); border-right: 1px solid var(--line); color: var(--ink-1); }
+.cmp-row .b { color: var(--ink-2); }
+@media (max-width: 700px) {
+  .cmp-row { grid-template-columns: 1fr; }
+  .cmp-row > div { border-right: 0 !important; border-bottom: 1px solid var(--line); }
+  .cmp-row > div:last-child { border-bottom: 0; }
+}
+
+/* ---------- Network protocol (M6) ---------- */
+.net-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.net-card {
+  padding: 22px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+.net-card .layer {
+  font-family: var(--mono); font-size: 11px; color: var(--mint);
+  margin-bottom: 6px;
+}
+.net-card h3 { font-size: 16px; }
+.net-card p { font-size: 13.5px; }
+
+/* ---------- API explorer (M7) ---------- */
+.api-grid {
+  display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px;
+}
+@media (max-width: 800px) { .api-grid { grid-template-columns: 1fr; } }
+.api-list {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  display: flex; flex-direction: column;
+  max-height: 480px; overflow-y: auto;
+}
+.api-item {
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+  cursor: pointer; transition: background 0.18s;
+  font-family: var(--mono); font-size: 12px;
+}
+.api-item:last-child { border-bottom: 0; }
+.api-item:hover { background: var(--bg-2); }
+.api-item.active { background: var(--bg-2); }
+.api-item .verb {
+  display: inline-block; min-width: 38px;
+  font-size: 10px; padding: 1px 6px; border-radius: 2px;
+  margin-right: 8px; font-weight: 600;
+}
+.api-item .verb.rpc { background: color-mix(in srgb, var(--mint) 15%, transparent); color: var(--mint); }
+.api-item .verb.ws { background: color-mix(in srgb, #b58cff 15%, transparent); color: #b58cff; }
+.api-item .verb.contract { background: color-mix(in srgb, #ffeb6e 15%, transparent); color: #ffeb6e; }
+.api-item .name { color: var(--ink-1); }
+.api-item.active .name { color: var(--ink-0); font-weight: 600; }
+.api-item .desc { color: var(--ink-3); font-size: 10.5px; margin-top: 2px; }
+.api-detail {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  padding: 22px;
+  font-family: var(--mono); font-size: 12.5px;
+}
+.api-detail h3 { font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--ink-0); margin: 0 0 6px; }
+.api-detail .endpoint { color: var(--mint); margin-bottom: 14px; font-size: 13.5px; }
+.api-detail h4 { font-family: var(--mono); font-weight: 500; font-size: 10.5px; color: var(--ink-3); margin: 14px 0 6px; text-transform: none; letter-spacing: 0; }
+.api-detail .body { color: var(--ink-2); font-family: var(--sans); font-size: 13.5px; margin-bottom: 12px; }
+.api-detail pre { margin: 0 0 8px; }
+.api-playground {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line);
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.api-playground button {
+  background: var(--mint); color: var(--bg-0); border: 0;
+  padding: 7px 12px; border-radius: var(--r-sm);
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+}
+.api-playground button:hover { background: var(--mint-soft); }
+.api-playground .latency { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+/* ---------- AI-native cards (M8) ---------- */
+.ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.ai-card {
+  padding: 22px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+  position: relative; overflow: hidden;
+}
+.ai-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--mint);
+}
+.ai-card h3 { font-size: 16px; }
+.ai-card p { font-size: 13.5px; }
+
+/* ---------- Economics (M9) ---------- */
+.econ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.econ-card {
+  padding: 22px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+.econ-card .label { font-family: var(--mono); font-size: 11px; color: var(--ink-2); margin-bottom: 8px; }
+.econ-card .figure {
+  font-family: var(--display); font-size: 38px; font-weight: 600;
+  color: var(--ink-0); line-height: 1;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.econ-card .figure .unit { font-family: var(--mono); font-size: 12px; color: var(--mint); font-weight: 400; }
+.econ-card .delta { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin: 8px 0 12px; }
+.econ-card p { font-size: 12.5px; margin: 0; }
+.bar-mini {
+  height: 4px; background: var(--bg-3); border-radius: 99px; margin: 10px 0;
+  overflow: hidden;
+}
+.bar-mini > span {
+  display: block; height: 100%; background: var(--mint);
+  border-radius: 99px; width: 0; transition: width 1.2s ease;
+}
+
+/* ---------- Civilization layer (M10) ---------- */
+.civ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.civ-card {
+  padding: 24px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+.civ-card .horizon { font-family: var(--mono); font-size: 11px; color: var(--mint); margin-bottom: 8px; }
+.civ-card h3 { font-size: 17px; }
+.civ-card p { font-size: 13.5px; }
+
+/* ---------- System modeler ---------- */
+.modeler {
+  border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+  padding: 32px;
+  background: var(--bg-1);
+}
+.dim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+.dim {
+  padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-0);
+}
+.dim h4 { color: var(--mint); margin-bottom: 8px; }
+.dim-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.dim-opt {
+  padding: 4px 10px; font-size: 12px;
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: transparent; color: var(--ink-2);
+  font-family: var(--mono);
+  transition: all 0.18s;
+}
+.dim-opt:hover { border-color: var(--mint); color: var(--ink-0); }
+.dim-opt.active { background: var(--mint); border-color: var(--mint); color: var(--bg-0); font-weight: 600; }
+.modeler-out {
+  margin-top: 20px; padding: 22px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-0);
+  display: none;
+}
+.modeler-out.shown { display: block; animation: rise 0.3s ease; }
+@keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modeler-out h3 { color: var(--mint); margin-bottom: 8px; font-family: var(--mono); font-weight: 500; font-size: 11px; }
+.modeler-out .verdict { font-family: var(--display); font-weight: 600; font-size: 22px; color: var(--ink-0); margin-bottom: 10px; }
+.modeler-out p { font-size: 14px; color: var(--ink-1); }
+.modeler-out .echoes { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+.modeler-out .echoes em { font-style: normal; color: var(--mint); margin-right: 6px; }
+.modeler-disclaim {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 10px;
+}
+
+/* ---------- Glossary ---------- */
+.gloss-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.gloss {
+  padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+.gloss .term { font-family: var(--mono); font-size: 13px; color: var(--mint); margin-bottom: 6px; }
+.gloss .def { font-size: 12.5px; color: var(--ink-1); margin: 0; }
+
+/* ---------- FAQ ---------- */
+.faqs { max-width: 880px; margin: 0 auto; }
+.faq { border-bottom: 1px solid var(--line); padding: 20px 0; }
+.faq summary {
+  list-style: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  font-family: var(--display); font-weight: 600; font-size: 18px; color: var(--ink-0);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: '+'; font-family: var(--mono); font-size: 18px; color: var(--mint);
+  transition: transform 0.3s;
+}
+.faq[open] summary::after { transform: rotate(45deg); }
+.faq .ans { padding-top: 10px; color: var(--ink-2); font-size: 14px; line-height: 1.65; }
+
+/* ---------- Footer ---------- */
+footer { border-top: 1px solid var(--line); padding: 48px 24px 28px; margin-top: 60px;
+  background: var(--bg-1); }
+.foot-grid {
+  max-width: var(--max); margin: 0 auto;
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px;
+}
+@media (max-width: 800px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { .foot-grid { grid-template-columns: 1fr; } }
+footer h5 { font-size: 11px; color: var(--ink-2); font-family: var(--mono); font-weight: 500; margin: 0 0 12px; }
+footer ul { list-style: none; padding: 0; margin: 0; }
+footer li { margin-bottom: 6px; }
+footer a { color: var(--ink-2); font-size: 13px; }
+footer a:hover { color: var(--mint); }
+.foot-bottom {
+  max-width: var(--max); margin: 32px auto 0; padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  font-size: 11px; color: var(--ink-3); font-family: var(--mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="glyph">ψ</span>
+      <span data-i18n="brand">Psy Spec</span>
+      <span class="ver">v0.9-draft</span>
+    </a>
+    <div class="nav-links">
+      <a href="#thesis" data-i18n="nav.thesis">Thesis</a>
+      <a href="#contents" data-i18n="nav.contents">Contents</a>
+      <a href="#architecture" data-i18n="nav.arch">Architecture</a>
+      <a href="#realms" data-i18n="nav.realms">Realms</a>
+      <a href="#coordinator" data-i18n="nav.coord">Coordinator</a>
+      <a href="#state" data-i18n="nav.state">State</a>
+      <a href="#runtime" data-i18n="nav.runtime">Runtime</a>
+      <a href="#network" data-i18n="nav.net">Network</a>
+      <a href="#api" data-i18n="nav.api">API</a>
+      <a href="#ai" data-i18n="nav.ai">AI</a>
+      <a href="#economics" data-i18n="nav.econ">Economics</a>
+      <a href="#civilization" data-i18n="nav.civ">Civilization</a>
+      <a href="#modeler" data-i18n="nav.mod">Modeler</a>
+      <a href="#glossary" data-i18n="nav.gloss">Glossary</a>
+      <a href="#faq" data-i18n="nav.faq">FAQ</a>
+    </div>
+    <div class="theme-switch" role="group" aria-label="Theme">
+      <button data-theme="dark" class="active">Dark</button>
+      <button data-theme="light">Light</button>
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button data-lang="en" class="active" aria-pressed="true">EN</button>
+      <button data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </div>
+</nav>
+
+<a id="top"></a>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-inner wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="sec-num"><span class="dot"></span><span class="label" data-i18n="hero.label">Specification · v0.9 draft · 2026</span></div>
+        <h1><span data-i18n-html="hero.headline">Psy Protocol — a substrate for <span class="accent">civilization-scale coordination</span>.</span></h1>
+        <p class="subtitle" data-i18n="hero.sub">A bilingual, deeply technical specification of Psy Protocol — realms, coordinators, state machine, runtime, networking, SDK, AI-native infrastructure, and the civilization-scale coordination layer that emerges from them. Less marketing, more architecture; less RFC-than-thou, more readable.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#contents"><span data-i18n="hero.ctaPrimary">Read the spec</span><span class="arrow">→</span></a>
+          <a class="btn btn-ghost" href="#api"><span data-i18n="hero.ctaSecondary">Open API explorer</span></a>
+        </div>
+      </div>
+      <div class="hero-mark" aria-hidden="true">
+        <div class="label-row"><span>ψ · psy-spec</span><span>v0.9</span></div>
+        <div class="psi">ψ</div>
+        <div class="meta-row"><span>plonky2 · goldilocks</span><span>poseidon</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ THESIS ============ -->
+<section id="thesis">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="dot"></span><span class="label" data-i18n="th.tag">Thesis · 0.0</span></div>
+      <h2 data-i18n="th.title">Protocols are becoming civilization infrastructure.</h2>
+      <p class="lede" data-i18n="th.body">A protocol used to be a way for two computers to agree on a packet format. The protocols of the next decade are something larger: shared state, programmable memory, persistent identity, and autonomous coordination among humans and machines. Psy is one such substrate — not "a blockchain," not "a crypto network," but a coordination layer that future internet civilizations could plausibly run on. This specification documents how it works, end to end.</p>
+    </div>
+    <div class="cmp-table">
+      <div class="cmp-row head">
+        <div class="lbl"></div>
+        <div class="left-h" data-i18n="th.cmpA">Old framing</div>
+        <div data-i18n="th.cmpB">Psy framing</div>
+      </div>
+      <div class="cmp-row"><div class="lbl" data-i18n="th.r1">What it is</div><div class="a" data-i18n="th.r1a">A blockchain.</div><div class="b" data-i18n="th.r1b">A coordination substrate with shared state, distributed execution, and persistent identity.</div></div>
+      <div class="cmp-row"><div class="lbl" data-i18n="th.r2">Primary user</div><div class="a" data-i18n="th.r2a">Crypto traders.</div><div class="b" data-i18n="th.r2b">Humans, organisations, and autonomous agents that need to share state.</div></div>
+      <div class="cmp-row"><div class="lbl" data-i18n="th.r3">Unit of value</div><div class="a" data-i18n="th.r3a">A token price.</div><div class="b" data-i18n="th.r3b">A piece of provably-shared state and the throughput to update it.</div></div>
+      <div class="cmp-row"><div class="lbl" data-i18n="th.r4">Time horizon</div><div class="a" data-i18n="th.r4a">Quarterly TVL.</div><div class="b" data-i18n="th.r4b">Decades of internet civilization.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ CONTENTS ============ -->
+<section id="contents">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="dot"></span><span class="label" data-i18n="toc.tag">Contents</span></div>
+      <h2 data-i18n="toc.title">Ten chapters, one stack.</h2>
+    </div>
+    <div class="toc" id="tocGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M1 — ARCHITECTURE ============ -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m1.tag">Chapter 01 · Architecture explorer</span></div>
+      <h2 data-i18n="m1.title">A request, all the way down.</h2>
+      <p class="lede" data-i18n="m1.intro">A user signs a transaction in the wallet. Eight components later, that transaction is a piece of provably-shared state visible to every other participant. Each component is replaceable; the boundaries between them are the spec. Click any block to read it.</p>
+    </div>
+
+    <div class="arch-svg-wrap">
+      <svg viewBox="0 0 980 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="false" role="img">
+        <!-- Lanes -->
+        <text x="20" y="32" font-family="JetBrains Mono" font-size="10" fill="#8e8ea0">USER</text>
+        <text x="20" y="120" font-family="JetBrains Mono" font-size="10" fill="#8e8ea0">EDGE</text>
+        <text x="20" y="208" font-family="JetBrains Mono" font-size="10" fill="#8e8ea0">CORE</text>
+        <text x="20" y="296" font-family="JetBrains Mono" font-size="10" fill="#8e8ea0">STORE</text>
+
+        <!-- Components -->
+        <g class="arch-node" data-node="wallet">
+          <rect x="80" y="14" width="170" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="92" y="32" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">psy-wallet</text>
+          <text x="92" y="48" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">browser ext.</text>
+        </g>
+        <g class="arch-node" data-node="sdk">
+          <rect x="80" y="100" width="170" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="92" y="118" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">psy-sdk</text>
+          <text x="92" y="134" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">prover · keys · rpc</text>
+        </g>
+        <g class="arch-node" data-node="coord">
+          <rect x="290" y="100" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="302" y="118" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">coordinator</text>
+          <text x="302" y="134" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">:5174 · sequencer</text>
+        </g>
+        <g class="arch-node" data-node="realm">
+          <rect x="510" y="100" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="522" y="118" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">realm engine</text>
+          <text x="522" y="134" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">:5175 · executor</text>
+        </g>
+        <g class="arch-node" data-node="prove">
+          <rect x="730" y="100" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="742" y="118" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">prove-proxy</text>
+          <text x="742" y="134" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">plonky2 · poseidon</text>
+        </g>
+        <g class="arch-node" data-node="validator">
+          <rect x="290" y="186" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="302" y="204" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">validator</text>
+          <text x="302" y="220" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">consensus · voting</text>
+        </g>
+        <g class="arch-node" data-node="bridge">
+          <rect x="510" y="186" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="522" y="204" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">bridge L1↔L2</text>
+          <text x="522" y="220" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">sepolia · settle</text>
+        </g>
+        <g class="arch-node" data-node="indexer">
+          <rect x="730" y="186" width="180" height="42" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="742" y="204" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">indexer · services</text>
+          <text x="742" y="220" font-family="JetBrains Mono" font-size="10" fill="#61f5b3">queryable views</text>
+        </g>
+        <g class="arch-node" data-node="store">
+          <rect x="290" y="270" width="620" height="36" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="302" y="293" font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">storage layer · state tree · IMT · proof DB</text>
+        </g>
+
+        <!-- Connectors (mint accent) -->
+        <g stroke="#61f5b3" stroke-width="1" fill="none" opacity="0.65">
+          <path d="M165 56 L165 100"/>
+          <path d="M250 121 L290 121"/>
+          <path d="M470 121 L510 121"/>
+          <path d="M690 121 L730 121"/>
+          <path d="M380 142 L380 186"/>
+          <path d="M600 142 L600 186"/>
+          <path d="M820 142 L820 186"/>
+          <path d="M380 228 L380 270"/>
+          <path d="M600 228 L600 270"/>
+          <path d="M820 228 L820 270"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="arch-detail" id="archDetail">
+      <div>
+        <div class="pri" id="archPri">psy-wallet</div>
+        <div class="ports" id="archPorts">browser extension</div>
+      </div>
+      <div class="body" id="archBody">
+        The Psy wallet is a browser extension that holds the user's Psy keys (a Plonky2-friendly key pair, distinct from any L1 EVM key) and signs transactions locally. It mediates every user interaction with the protocol — including the per-recipient claim popups for L1→L2 deposits.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M2 — REALMS ============ -->
+<section id="realms">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m2.tag">Chapter 02 · Realm specification</span></div>
+      <h2 data-i18n="m2.title">A realm is a unit of shared state.</h2>
+      <p class="lede" data-i18n="m2.intro">A realm is the protocol's unit of locality. Every account, contract, and balance lives inside exactly one realm; cross-realm communication is explicit and settled at the bridge. Realms isolate failures, parallelise execution, and let the protocol scale without forcing every account into the same global queue.</p>
+    </div>
+    <div class="realms-grid" id="realmGrid"></div>
+    <pre style="margin-top: 24px;"><span class="com">// realm message envelope (simplified)</span>
+<span class="c1">struct</span> RealmMessage {
+  <span class="c2">src_realm</span>: u32,        <span class="com">// e.g. 0</span>
+  <span class="c2">dst_realm</span>: u32,        <span class="com">// e.g. 1</span>
+  <span class="c2">seq</span>:       u64,
+  <span class="c2">payload</span>:   bytes,
+  <span class="c2">commitment</span>: poseidon256,  <span class="com">// inclusion-provable</span>
+}</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M3 — COORDINATOR ============ -->
+<section id="coordinator">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m3.tag">Chapter 03 · Coordinator</span></div>
+      <h2 data-i18n="m3.title">The coordinator is the seam between user intent and shared state.</h2>
+      <p class="lede" data-i18n="m3.intro">The coordinator service (default port 5174) accepts signed transactions from clients, orders them, batches them into blocks, hands them to the realm engine for execution, and forwards the resulting state-root commitment to the validator set. It is not the only honest party in the system — but it is the most latency-sensitive one.</p>
+    </div>
+    <div class="coord-grid" id="coordGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M4 — STATE ============ -->
+<section id="state">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m4.tag">Chapter 04 · State transition machine</span></div>
+      <h2 data-i18n="m4.title">A protocol is a function from state and transactions to state.</h2>
+      <p class="lede" data-i18n="m4.intro">Psy state is a Merkle tree of accounts and contract storage, hashed with Poseidon (Goldilocks field). A block is a list of signed transactions; applying a block deterministically rewrites a subtree of state. Validators do not re-execute the block — they verify a Plonky2 proof that the new state root follows from the old one under the protocol's transition function.</p>
+    </div>
+    <div class="sm-wrap">
+      <svg viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- States as boxes -->
+        <g font-family="Inter" font-size="13" font-weight="600" fill="#f4f4f8">
+          <rect x="20" y="80" width="120" height="40" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="80" y="105" text-anchor="middle">S(n)</text>
+
+          <rect x="220" y="80" width="120" height="40" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="280" y="105" text-anchor="middle">batch(B)</text>
+
+          <rect x="420" y="80" width="120" height="40" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="480" y="105" text-anchor="middle">execute</text>
+
+          <rect x="620" y="80" width="120" height="40" rx="4" fill="#16161c" stroke="#1f1f28"/>
+          <text x="680" y="105" text-anchor="middle">prove</text>
+
+          <rect x="20" y="160" width="120" height="34" rx="4" fill="#16161c" stroke="#61f5b3" opacity="0.7"/>
+          <text x="80" y="183" text-anchor="middle" font-size="12" fill="#61f5b3">S(n+1)</text>
+        </g>
+        <!-- arrows -->
+        <g stroke="#61f5b3" stroke-width="1" fill="none">
+          <path d="M140 100 L220 100" marker-end="url(#arrow)"/>
+          <path d="M340 100 L420 100" marker-end="url(#arrow)"/>
+          <path d="M540 100 L620 100" marker-end="url(#arrow)"/>
+          <path d="M680 120 Q680 160 140 175" marker-end="url(#arrow)"/>
+        </g>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L10 5 L0 10 z" fill="#61f5b3"/>
+          </marker>
+        </defs>
+        <!-- Transition function label -->
+        <text x="440" y="50" font-family="JetBrains Mono" font-size="11" fill="#8e8ea0" text-anchor="middle">S(n+1) = f(S(n), B)</text>
+      </svg>
+      <div class="sm-states" id="smStates"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M5 — RUNTIME ============ -->
+<section id="runtime">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m5.tag">Chapter 05 · Contract runtime</span></div>
+      <h2 data-i18n="m5.title">Not an EVM.</h2>
+      <p class="lede" data-i18n="m5.intro">Psy contracts are not EVM bytecode. Both the language semantics and the runtime are co-designed with the proving system: every primitive must be cheap to enforce as a Plonky2 constraint, and storage is laid out for efficient Merkle proofs. The trade-off: smaller surface area, larger throughput per proof, and no on-chain Solidity. The table below names where Psy diverges from a typical EVM-like chain.</p>
+    </div>
+    <div class="cmp-table">
+      <div class="cmp-row head">
+        <div class="lbl"></div>
+        <div class="left-h" data-i18n="rt.headA">Psy runtime</div>
+        <div data-i18n="rt.headB">Typical EVM chain</div>
+      </div>
+      <div class="cmp-row" id="rtRow1"></div>
+      <div class="cmp-row" id="rtRow2"></div>
+      <div class="cmp-row" id="rtRow3"></div>
+      <div class="cmp-row" id="rtRow4"></div>
+      <div class="cmp-row" id="rtRow5"></div>
+      <div class="cmp-row" id="rtRow6"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M6 — NETWORKING ============ -->
+<section id="network">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m6.tag">Chapter 06 · Networking</span></div>
+      <h2 data-i18n="m6.title">A network of small honest parties beats one large opaque one.</h2>
+      <p class="lede" data-i18n="m6.intro">Psy nodes form a libp2p-flavoured peer fabric carrying four classes of message: tx, block, vote, and proof. The protocol does not assume any node is honest; it does assume that some bounded fraction is, and that the fabric routes messages within a few hops. Below: the four message types, with their headers and propagation rules.</p>
+    </div>
+    <div class="net-grid" id="netGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M7 — API ============ -->
+<section id="api">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m7.tag">Chapter 07 · API explorer</span></div>
+      <h2 data-i18n="m7.title">Eight requests that exercise the whole stack.</h2>
+      <p class="lede" data-i18n="m7.intro">The full RPC surface is hundreds of methods; the eight below are the ones a developer reads first. Pick any to see the shape of the request, the response, and a synthetic trial run. The "send" button is local-only — it does not contact any server; it constructs a deterministic response from a small in-browser stub so you can see the format without authentication.</p>
+    </div>
+    <div class="api-grid">
+      <div class="api-list" id="apiList"></div>
+      <div class="api-detail" id="apiDetail"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M8 — AI ============ -->
+<section id="ai">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m8.tag">Chapter 08 · AI-native infrastructure</span></div>
+      <h2 data-i18n="m8.title">Future agents will need an internet they can be honest in.</h2>
+      <p class="lede" data-i18n="m8.intro">When agents transact and remember on each other's behalf, the protocol underneath them stops being optional infrastructure and starts being the constitution. Psy's primitives — persistent identity, shared state, low-latency settlement, decentralised memory — are designed to be useful to autonomous agents specifically, not just to humans pretending to be agents.</p>
+    </div>
+    <div class="ai-grid" id="aiGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M9 — ECONOMICS ============ -->
+<section id="economics">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m9.tag">Chapter 09 · Protocol economics &amp; scaling</span></div>
+      <h2 data-i18n="m9.title">Six numbers that describe the steady-state.</h2>
+      <p class="lede" data-i18n="m9.intro">Headline figures from the v0.9 reference implementation under the standard benchmark workload. The numbers are illustrative and will change with realm count and prover hardware, but the relative shape is informative.</p>
+    </div>
+    <div class="econ-grid" id="econGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ M10 — CIVILIZATION ============ -->
+<section id="civilization">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="m10.tag">Chapter 10 · Civilization infrastructure</span></div>
+      <h2 data-i18n="m10.title">Six futures the substrate makes plausible.</h2>
+      <p class="lede" data-i18n="m10.intro">A protocol is a piece of social engineering wearing technical clothing. Below: six classes of institution that look feasible if a substrate like Psy reaches civilization scale. None is inevitable; each is an open construction project.</p>
+    </div>
+    <div class="civ-grid" id="civGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ MODELER ============ -->
+<section id="modeler">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="md.tag">System modeler</span></div>
+      <h2 data-i18n="md.title">Six knobs. One protocol regime.</h2>
+      <p class="lede" data-i18n="md.intro">Pick a value for each of six dimensions — workload, realm count, prover capacity, network latency, validator participation, and AI-agent share. The modeler pattern-matches your selection against an internal table and writes a short outlook on the protocol's expected behaviour. It is local-only, deterministic, and not a real benchmark.</p>
+    </div>
+    <div class="modeler">
+      <div class="dim-grid" id="dimGrid"></div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <button class="btn btn-primary" id="runMod"><span data-i18n="md.run">Synthesize</span><span class="arrow">→</span></button>
+        <button class="btn btn-ghost" id="resetMod" data-i18n="md.reset">Reset</button>
+      </div>
+      <div class="modeler-out" id="modOut" aria-live="polite"></div>
+      <div class="modeler-disclaim" data-i18n="md.disclaim">// local rule-based synthesis · runs in the browser · no remote AI is called</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ GLOSSARY ============ -->
+<section id="glossary">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="gl.tag">Glossary</span></div>
+      <h2 data-i18n="gl.title">Twelve terms the spec leans on.</h2>
+    </div>
+    <div class="gloss-grid" id="glossGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="sec-num"><span class="label" data-i18n="fq.tag">FAQ</span></div>
+      <h2 data-i18n="fq.title">Honest answers, including the speculative ones.</h2>
+    </div>
+    <div class="faqs" id="faqList"></div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <div class="brand" style="margin-bottom: 12px;">
+        <span class="glyph">ψ</span>
+        <span data-i18n="brand">Psy Spec</span>
+        <span class="ver">v0.9</span>
+      </div>
+      <p style="font-size:13px; max-width: 50ch; color: var(--ink-2);" data-i18n="foot.tag">A bilingual technical specification of Psy Protocol — built to make the architecture legible to engineers, researchers, and anyone willing to read a real spec.</p>
+    </div>
+    <div>
+      <h5 data-i18n="foot.spec">Spec</h5>
+      <ul>
+        <li><a href="#architecture" data-i18n="nav.arch">Architecture</a></li>
+        <li><a href="#realms" data-i18n="nav.realms">Realms</a></li>
+        <li><a href="#state" data-i18n="nav.state">State machine</a></li>
+        <li><a href="#runtime" data-i18n="nav.runtime">Runtime</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 data-i18n="foot.dev">Developer</h5>
+      <ul>
+        <li><a href="#api" data-i18n="nav.api">API</a></li>
+        <li><a href="#ai" data-i18n="nav.ai">AI infra</a></li>
+        <li><a href="#economics" data-i18n="nav.econ">Economics</a></li>
+        <li><a href="#glossary" data-i18n="nav.gloss">Glossary</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5 data-i18n="foot.about">About</h5>
+      <ul>
+        <li><a href="https://psyverse.fun" target="_blank" rel="noopener">Psyverse</a></li>
+        <li><a href="https://github.com/gewenbo888/psy-spec" target="_blank" rel="noopener">Source</a></li>
+        <li><span data-i18n="foot.licence">Public-interest, non-commercial</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 · ψ <span data-i18n="brand">Psy Spec</span></span>
+    <span data-i18n="foot.note">// static · no backend · no tracking beyond aggregate visit counts</span>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   PSY SPEC — single-file static specification
+   ============================================================ */
+
+/* ---------- i18n ---------- */
+const I18N = {
+  en: {
+    brand: "Psy Spec",
+    "nav.thesis":"Thesis","nav.contents":"Contents","nav.arch":"Architecture","nav.realms":"Realms",
+    "nav.coord":"Coordinator","nav.state":"State","nav.runtime":"Runtime","nav.net":"Network",
+    "nav.api":"API","nav.ai":"AI","nav.econ":"Economics","nav.civ":"Civilization",
+    "nav.mod":"Modeler","nav.gloss":"Glossary","nav.faq":"FAQ",
+    "hero.label":"Specification · v0.9 draft · 2026",
+    "hero.headline":"Psy Protocol — a substrate for <span class=\"accent\">civilization-scale coordination</span>.",
+    "hero.sub":"A bilingual, deeply technical specification of Psy Protocol — realms, coordinators, state machine, runtime, networking, SDK, AI-native infrastructure, and the civilization-scale coordination layer that emerges from them. Less marketing, more architecture; less RFC-than-thou, more readable.",
+    "hero.ctaPrimary":"Read the spec","hero.ctaSecondary":"Open API explorer",
+    "th.tag":"Thesis · 0.0",
+    "th.title":"Protocols are becoming civilization infrastructure.",
+    "th.body":"A protocol used to be a way for two computers to agree on a packet format. The protocols of the next decade are something larger: shared state, programmable memory, persistent identity, and autonomous coordination among humans and machines. Psy is one such substrate — not \"a blockchain,\" not \"a crypto network,\" but a coordination layer that future internet civilizations could plausibly run on. This specification documents how it works, end to end.",
+    "th.cmpA":"Old framing","th.cmpB":"Psy framing",
+    "th.r1":"What it is","th.r1a":"A blockchain.","th.r1b":"A coordination substrate with shared state, distributed execution, and persistent identity.",
+    "th.r2":"Primary user","th.r2a":"Crypto traders.","th.r2b":"Humans, organisations, and autonomous agents that need to share state.",
+    "th.r3":"Unit of value","th.r3a":"A token price.","th.r3b":"A piece of provably-shared state and the throughput to update it.",
+    "th.r4":"Time horizon","th.r4a":"Quarterly TVL.","th.r4b":"Decades of internet civilization.",
+    "toc.tag":"Contents",
+    "toc.title":"Ten chapters, one stack.",
+    "m1.tag":"Chapter 01 · Architecture explorer",
+    "m1.title":"A request, all the way down.",
+    "m1.intro":"A user signs a transaction in the wallet. Eight components later, that transaction is a piece of provably-shared state visible to every other participant. Each component is replaceable; the boundaries between them are the spec. Click any block to read it.",
+    "m2.tag":"Chapter 02 · Realm specification",
+    "m2.title":"A realm is a unit of shared state.",
+    "m2.intro":"A realm is the protocol's unit of locality. Every account, contract, and balance lives inside exactly one realm; cross-realm communication is explicit and settled at the bridge. Realms isolate failures, parallelise execution, and let the protocol scale without forcing every account into the same global queue.",
+    "m3.tag":"Chapter 03 · Coordinator",
+    "m3.title":"The coordinator is the seam between user intent and shared state.",
+    "m3.intro":"The coordinator service (default port 5174) accepts signed transactions from clients, orders them, batches them into blocks, hands them to the realm engine for execution, and forwards the resulting state-root commitment to the validator set. It is not the only honest party in the system — but it is the most latency-sensitive one.",
+    "m4.tag":"Chapter 04 · State transition machine",
+    "m4.title":"A protocol is a function from state and transactions to state.",
+    "m4.intro":"Psy state is a Merkle tree of accounts and contract storage, hashed with Poseidon (Goldilocks field). A block is a list of signed transactions; applying a block deterministically rewrites a subtree of state. Validators do not re-execute the block — they verify a Plonky2 proof that the new state root follows from the old one under the protocol's transition function.",
+    "m5.tag":"Chapter 05 · Contract runtime",
+    "m5.title":"Not an EVM.",
+    "m5.intro":"Psy contracts are not EVM bytecode. Both the language semantics and the runtime are co-designed with the proving system: every primitive must be cheap to enforce as a Plonky2 constraint, and storage is laid out for efficient Merkle proofs. The trade-off: smaller surface area, larger throughput per proof, and no on-chain Solidity. The table below names where Psy diverges from a typical EVM-like chain.",
+    "rt.headA":"Psy runtime","rt.headB":"Typical EVM chain",
+    "m6.tag":"Chapter 06 · Networking",
+    "m6.title":"A network of small honest parties beats one large opaque one.",
+    "m6.intro":"Psy nodes form a libp2p-flavoured peer fabric carrying four classes of message: tx, block, vote, and proof. The protocol does not assume any node is honest; it does assume that some bounded fraction is, and that the fabric routes messages within a few hops. Below: the four message types, with their headers and propagation rules.",
+    "m7.tag":"Chapter 07 · API explorer",
+    "m7.title":"Eight requests that exercise the whole stack.",
+    "m7.intro":"The full RPC surface is hundreds of methods; the eight below are the ones a developer reads first. Pick any to see the shape of the request, the response, and a synthetic trial run. The \"send\" button is local-only — it does not contact any server; it constructs a deterministic response from a small in-browser stub so you can see the format without authentication.",
+    "m8.tag":"Chapter 08 · AI-native infrastructure",
+    "m8.title":"Future agents will need an internet they can be honest in.",
+    "m8.intro":"When agents transact and remember on each other's behalf, the protocol underneath them stops being optional infrastructure and starts being the constitution. Psy's primitives — persistent identity, shared state, low-latency settlement, decentralised memory — are designed to be useful to autonomous agents specifically, not just to humans pretending to be agents.",
+    "m9.tag":"Chapter 09 · Protocol economics & scaling",
+    "m9.title":"Six numbers that describe the steady-state.",
+    "m9.intro":"Headline figures from the v0.9 reference implementation under the standard benchmark workload. The numbers are illustrative and will change with realm count and prover hardware, but the relative shape is informative.",
+    "m10.tag":"Chapter 10 · Civilization infrastructure",
+    "m10.title":"Six futures the substrate makes plausible.",
+    "m10.intro":"A protocol is a piece of social engineering wearing technical clothing. Below: six classes of institution that look feasible if a substrate like Psy reaches civilization scale. None is inevitable; each is an open construction project.",
+    "md.tag":"System modeler",
+    "md.title":"Six knobs. One protocol regime.",
+    "md.intro":"Pick a value for each of six dimensions — workload, realm count, prover capacity, network latency, validator participation, and AI-agent share. The modeler pattern-matches your selection against an internal table and writes a short outlook on the protocol's expected behaviour. It is local-only, deterministic, and not a real benchmark.",
+    "md.run":"Synthesize","md.reset":"Reset",
+    "md.disclaim":"// local rule-based synthesis · runs in the browser · no remote AI is called",
+    "md.empty":"Pick a value in every dimension to synthesize a regime.",
+    "md.verdict":"Verdict","md.summary":"What the regime implies","md.echoes":"Closest existing benchmarks",
+    "gl.tag":"Glossary","gl.title":"Twelve terms the spec leans on.",
+    "fq.tag":"FAQ","fq.title":"Honest answers, including the speculative ones.",
+    "foot.tag":"A bilingual technical specification of Psy Protocol — built to make the architecture legible to engineers, researchers, and anyone willing to read a real spec.",
+    "foot.spec":"Spec","foot.dev":"Developer","foot.about":"About",
+    "foot.licence":"Public-interest, non-commercial",
+    "foot.note":"// static · no backend · no tracking beyond aggregate visit counts",
+    "api.send":"Run locally","api.body":"Description","api.req":"Request","api.res":"Response","api.lat":"sample latency"
+  },
+  zh: {
+    brand:"Psy 协议规范",
+    "nav.thesis":"命题","nav.contents":"目录","nav.arch":"架构","nav.realms":"Realm",
+    "nav.coord":"协调器","nav.state":"状态","nav.runtime":"运行时","nav.net":"网络",
+    "nav.api":"API","nav.ai":"AI","nav.econ":"经济","nav.civ":"文明",
+    "nav.mod":"建模器","nav.gloss":"术语","nav.faq":"问答",
+    "hero.label":"规范 · v0.9 草案 · 2026",
+    "hero.headline":"Psy 协议——一层<span class=\"accent\">文明级协调底座</span>。",
+    "hero.sub":"一份双语的、深度技术化的 Psy 协议规范——realm、协调器、状态机、运行时、网络、SDK、AI-native 基础设施，以及由它们涌现出的文明级协调层。少营销，多架构；不装 RFC，但要可读。",
+    "hero.ctaPrimary":"阅读规范","hero.ctaSecondary":"打开 API 浏览器",
+    "th.tag":"命题 · 0.0",
+    "th.title":"协议正在成为文明基础设施。",
+    "th.body":"协议曾经只是两台计算机就「报文格式」达成一致的方式。下一个十年的协议则是更大的东西：共享状态、可编程记忆、持久身份，以及人与机器之间的自治协调。Psy 即是这样一种底座——不是「区块链」、不是「加密网络」，而是未来互联网文明合理可以运行其上的协调层。这份规范从头到尾说明它如何运作。",
+    "th.cmpA":"旧框架","th.cmpB":"Psy 框架",
+    "th.r1":"是什么","th.r1a":"一条区块链。","th.r1b":"具备共享状态、分布式执行与持久身份的协调底座。",
+    "th.r2":"主要用户","th.r2a":"加密交易者。","th.r2b":"需要共享状态的人、组织与自治智能体。",
+    "th.r3":"价值单位","th.r3a":"代币价格。","th.r3b":"一段可证地共享的状态，以及更新它的吞吐能力。",
+    "th.r4":"时间尺度","th.r4a":"季度 TVL。","th.r4b":"互联网文明的数十年。",
+    "toc.tag":"目录",
+    "toc.title":"十章，一座栈。",
+    "m1.tag":"第 01 章 · 架构浏览器",
+    "m1.title":"一笔请求，自上而下。",
+    "m1.intro":"用户在钱包里签下一笔交易。八个组件之后，这笔交易已成为对每个其他参与者可见的「可证地共享的状态」。每一组件可替换；它们之间的边界即是规范。点击任意方块即可阅读其说明。",
+    "m2.tag":"第 02 章 · Realm 规范",
+    "m2.title":"Realm 是共享状态的一个单元。",
+    "m2.intro":"Realm 是协议的「locality 单元」。每一个账户、合约、余额都恰好属于一个 realm；跨 realm 通讯是显式的、并在桥上结算。Realm 隔离故障、并行化执行，并让协议在不强迫每一个账户挤在同一条全局队列里的前提下扩展。",
+    "m3.tag":"第 03 章 · 协调器",
+    "m3.title":"协调器是用户意图与共享状态之间的接缝。",
+    "m3.intro":"协调器服务（默认端口 5174）接受客户端签好的交易、排序、打包成块、移交给 realm 引擎执行、并把所得状态根承诺转发给验证者集合。它不是系统中唯一诚实的一方——但它是对延迟最敏感的一方。",
+    "m4.tag":"第 04 章 · 状态转移机",
+    "m4.title":"协议即「从（状态，交易）到状态」的函数。",
+    "m4.intro":"Psy 的状态是一棵账户与合约存储的 Merkle 树，以 Poseidon（Goldilocks 域）哈希。一个块是一组签好的交易；应用一个块即确定地改写状态的某一子树。验证者不重新执行这个块——他们验证一个 Plonky2 证明，证明在协议转移函数下，新状态根由旧状态根派生而来。",
+    "m5.tag":"第 05 章 · 合约运行时",
+    "m5.title":"不是 EVM。",
+    "m5.intro":"Psy 的合约不是 EVM 字节码。语言语义与运行时都与证明系统协同设计：每一项原语都必须能被廉价地编码为 Plonky2 约束，存储则按高效 Merkle 证明的样态布置。代价：表面积更小，每证明的吞吐更大，链上没有 Solidity。下表点出 Psy 与一条典型 EVM 类链的差异。",
+    "rt.headA":"Psy 运行时","rt.headB":"典型 EVM 链",
+    "m6.tag":"第 06 章 · 网络",
+    "m6.title":"小而诚实之众，胜过大而不透明之独。",
+    "m6.intro":"Psy 节点构成一张 libp2p 风格的对等网络，承载四类消息：tx、block、vote、proof。协议不假定任一节点诚实；它假定其中受限比例诚实，且消息能在数跳内被网络转发。下面：四类消息的报文头与传播规则。",
+    "m7.tag":"第 07 章 · API 浏览器",
+    "m7.title":"八个练全栈的请求。",
+    "m7.intro":"完整的 RPC 表面有数百个方法；下面这八个，是开发者最先会读的那些。任选其一即可看到请求形态、响应形态与一次合成试运行。「发送」按钮是本地的——它不联系任何服务器；它从一段浏览器内的小桩函数构造一个确定响应，以便你在没有任何认证的情况下也能看到格式。",
+    "m8.tag":"第 08 章 · AI-native 基础设施",
+    "m8.title":"未来的智能体需要一个「能在其中诚实」的互联网。",
+    "m8.intro":"当智能体代彼此交易与记忆时，它们之下的协议就不再是可选的基础设施，而开始扮演宪法。Psy 的原语——持久身份、共享状态、低延迟结算、去中心化记忆——是为自治智能体设计的，而不是只为「装作智能体的人」设计。",
+    "m9.tag":"第 09 章 · 协议经济与扩展",
+    "m9.title":"六个数字，描述稳态。",
+    "m9.intro":"v0.9 参考实现在标准基准负载下的标题数字。这些数字是示意性的，会随 realm 数量与证明硬件而变化，但相对形态有参考价值。",
+    "m10.tag":"第 10 章 · 文明基础设施",
+    "m10.title":"底座所使可能成立的六种未来。",
+    "m10.intro":"一个协议，是一件穿着技术外衣的社会工程。下面：若 Psy 这样的底座到达文明尺度时，看似可行的六类机构。无一注定；每一项都是开放的建造工程。",
+    "md.tag":"系统建模器",
+    "md.title":"六个旋钮，一种协议格局。",
+    "md.intro":"为六个维度各选一个值——负载、realm 数、证明能力、网络延迟、验证者参与度、AI 智能体占比。建模器把你的选择与一张内部表格做模式匹配，并写下对协议预期行为的简短展望。它是本地的、确定的、不是真实基准。",
+    "md.run":"合成","md.reset":"重置",
+    "md.disclaim":"// 本地基于规则的合成 · 在浏览器中运行 · 不调用任何远端 AI",
+    "md.empty":"请为每个维度都选一个值，再合成格局。",
+    "md.verdict":"判定","md.summary":"该格局意味着什么","md.echoes":"最近的现存对照",
+    "gl.tag":"术语","gl.title":"规范倚赖的十二个词。",
+    "fq.tag":"问答","fq.title":"诚实的回答，包括思辨性的那些。",
+    "foot.tag":"一份双语的 Psy 协议技术规范——为让架构对工程师、研究者、以及任何愿意读真规范的人可读而建。",
+    "foot.spec":"规范","foot.dev":"开发者","foot.about":"关于",
+    "foot.licence":"公益项目 · 非商业",
+    "foot.note":"// 静态 · 无后端 · 仅有聚合访问量",
+    "api.send":"本地运行","api.body":"说明","api.req":"请求","api.res":"响应","api.lat":"示例延迟"
+  }
+};
+
+/* ---------- DATA ---------- */
+
+/* TOC */
+const TOC = [
+  { id:'architecture', en:{n:'01', t:'Architecture explorer', s:'wallet → coordinator → realm → store'}, zh:{n:'01', t:'架构浏览器', s:'钱包 → 协调器 → realm → 存储'} },
+  { id:'realms',       en:{n:'02', t:'Realm specification', s:'isolation, lifecycle, messages'},        zh:{n:'02', t:'Realm 规范', s:'隔离 · 生命周期 · 消息'} },
+  { id:'coordinator',  en:{n:'03', t:'Coordinator', s:'sequencing, batching, validation'},               zh:{n:'03', t:'协调器', s:'排序 · 打包 · 校验'} },
+  { id:'state',        en:{n:'04', t:'State transition machine', s:'merkle · poseidon · plonky2'},      zh:{n:'04', t:'状态转移机', s:'Merkle · Poseidon · Plonky2'} },
+  { id:'runtime',      en:{n:'05', t:'Contract runtime', s:'not an EVM'},                                zh:{n:'05', t:'合约运行时', s:'不是 EVM'} },
+  { id:'network',      en:{n:'06', t:'Networking', s:'libp2p · 4 message types'},                        zh:{n:'06', t:'网络', s:'libp2p · 四类消息'} },
+  { id:'api',          en:{n:'07', t:'API explorer', s:'rpc · websocket · contract'},                    zh:{n:'07', t:'API 浏览器', s:'RPC · WebSocket · 合约'} },
+  { id:'ai',           en:{n:'08', t:'AI-native infrastructure', s:'agents, memory, coordination'},      zh:{n:'08', t:'AI-native 基础设施', s:'智能体 · 记忆 · 协调'} },
+  { id:'economics',    en:{n:'09', t:'Protocol economics', s:'throughput, cost, growth'},                zh:{n:'09', t:'协议经济', s:'吞吐 · 成本 · 增长'} },
+  { id:'civilization', en:{n:'10', t:'Civilization infrastructure', s:'institutions, economies'},        zh:{n:'10', t:'文明基础设施', s:'机构 · 经济'} }
+];
+
+/* Architecture nodes (M1) */
+const ARCH = {
+  wallet:   { en:{p:'psy-wallet', x:'browser extension', b:'The Psy wallet is a browser extension that holds the user\'s Psy keys (a Plonky2-friendly key pair, distinct from any L1 EVM key) and signs transactions locally. It mediates every user interaction with the protocol — including the per-recipient claim popups for L1→L2 deposits.'},
+              zh:{p:'psy-wallet', x:'浏览器扩展', b:'Psy 钱包是一款浏览器扩展，本地保管用户的 Psy 密钥（一对与 Plonky2 友好的密钥，与任何 L1 EVM 密钥不同），并在本地签名交易。它中介用户与协议的每一次交互——包括 L1→L2 存款的逐收件人「认领」弹窗。'} },
+  sdk:      { en:{p:'psy-sdk', x:'prover · keys · rpc', b:'A TypeScript and Rust SDK for talking to the protocol from any client. Includes the local Plonky2 prover, key management, RPC stubs, and the bincode serialisation that the rest of the stack expects.'},
+              zh:{p:'psy-sdk', x:'证明 · 密钥 · RPC', b:'一套面向任意客户端的 TypeScript 与 Rust SDK：包含本地 Plonky2 证明器、密钥管理、RPC 桩，以及栈其余部分所期望的 bincode 序列化。'} },
+  coord:    { en:{p:'coordinator', x:':5174 · sequencer', b:'Receives signed transactions over JSON-RPC, orders them deterministically, batches them into blocks, hands them to the realm engine, and forwards the resulting state-root commitment to the validator set. Single-instance per realm in v0.9; rotating in v1.0.'},
+              zh:{p:'协调器', x:':5174 · 排序器', b:'通过 JSON-RPC 接收签好的交易，确定地排序，打包成块，交给 realm 引擎，并把所得状态根承诺转发到验证者集合。v0.9 中每 realm 单实例；v1.0 中轮值。'} },
+  realm:    { en:{p:'realm engine', x:':5175 · executor', b:'The execution engine for a single realm. Holds the realm\'s Merkle state tree, applies blocks, runs contracts, emits events, and maintains the IMT (incremental Merkle tree) of deposits.'},
+              zh:{p:'realm 引擎', x:':5175 · 执行器', b:'单个 realm 的执行引擎。持有该 realm 的 Merkle 状态树，应用块、运行合约、发出事件，并维护存款的 IMT（增量 Merkle 树）。'} },
+  prove:    { en:{p:'prove-proxy', x:'plonky2 · poseidon', b:'Generates the Plonky2 STARK / SNARK proof that the realm\'s new state root follows from the old one. Goldilocks field, Poseidon hashing. Takes the heaviest CPU/GPU load in the system; proof times scale ~linearly with block size.'},
+              zh:{p:'prove-proxy', x:'Plonky2 · Poseidon', b:'生成 Plonky2 STARK / SNARK 证明，证明 realm 的新状态根由旧状态根派生而来。Goldilocks 域、Poseidon 哈希。承担系统最重的 CPU/GPU 负载；证明时间与块大小近线性扩展。'} },
+  validator:{ en:{p:'validator', x:'consensus · voting', b:'Verifies the prove-proxy\'s proof and votes on the new state root. A validator does not re-execute the block; it only verifies the proof. v0.9 uses a small permissioned set; v1.0 introduces a stake-weighted permissionless set.'},
+              zh:{p:'验证者', x:'共识 · 投票', b:'验证 prove-proxy 的证明并对新状态根投票。验证者不重执行块；仅验证证明。v0.9 使用小型许可制集合；v1.0 引入按权益加权的无许可集合。'} },
+  bridge:   { en:{p:'bridge L1↔L2', x:'sepolia · settle', b:'A pair of contracts on the L1 (Sepolia in test, Ethereum in prod) and the Psy side that handles cross-chain deposits and withdrawals. Each L1→L2 deposit is claimed individually by its own recipient on the Psy side; there is no batch claim, no proxy claim, no auto claim.'},
+              zh:{p:'桥 L1↔L2', x:'Sepolia · 结算', b:'L1（测试网为 Sepolia，主网为 Ethereum）与 Psy 一侧的一对合约，处理跨链存提。每一笔 L1→L2 存款由其各自的收件人在 Psy 一侧逐笔认领；无批量认领、无代理认领、无自动认领。'} },
+  indexer:  { en:{p:'indexer · services', x:'queryable views', b:'Reads the canonical state and emits queryable views — wallet balances, transaction history, contract events, realm cross-references. The Rust indexer in QEDProtocol/psy-services is canonical; do not confuse it with any local psy-indexer folder.'},
+              zh:{p:'indexer · services', x:'可查询视图', b:'读取规范状态并发出可查询视图——钱包余额、交易历史、合约事件、realm 交叉引用。QEDProtocol/psy-services 中的 Rust indexer 为规范；勿与任何本地 psy-indexer 文件夹混淆。'} },
+  store:    { en:{p:'storage layer', x:'state tree · IMT · proof DB', b:'A content-addressable store of every Merkle node, every IMT leaf, and every proof. Pruning is realm-local; archival nodes keep history, validator nodes keep only the last N blocks.'},
+              zh:{p:'存储层', x:'状态树 · IMT · 证明库', b:'每一 Merkle 节点、每一 IMT 叶子、每一证明的内容寻址存储。剪枝以 realm 为单位；归档节点保留全部历史，验证节点仅保留最近 N 块。'} }
+};
+
+/* Realms (M2) */
+const REALMS = [
+  { en:{ id:'realm 0 · root', t:'Root realm', body:'The genesis realm. Hosts the Psy native token, the bridge contracts on the L2 side, and the test users (e.g. the canonical Alice and Bob: uid=0 and uid=524288, both in realm 0).',
+         lifecycle:'genesis · always-active', participants:'all validators', state_size:'~unbounded' },
+    zh:{ id:'realm 0 · 根', t:'根 realm', body:'创世 realm。承载 Psy 原生代币、L2 一侧的桥合约，以及测试用户（如规范的 Alice 与 Bob：uid=0 与 uid=524288，皆在 realm 0）。',
+         lifecycle:'创世 · 始终活动', participants:'全体验证者', state_size:'约 无上限' } },
+  { en:{ id:'application realms', t:'Application realms', body:'User-launched realms for specific applications: a DeFi market, a social graph, a game, a research dataset. Each runs an independent state machine; cross-realm calls go through bridge messages.',
+         lifecycle:'on-demand · finalised on close', participants:'realm validators', state_size:'application-bounded' },
+    zh:{ id:'应用 realm', t:'应用 realm', body:'由用户为特定应用所启动的 realm：DeFi 市场、社交图、游戏、研究数据集。每一个跑独立的状态机；跨 realm 调用经桥消息。',
+         lifecycle:'按需 · 关闭时定型', participants:'realm 验证者', state_size:'按应用受限' } },
+  { en:{ id:'agent realms', t:'Agent realms', body:'Realms whose participants are autonomous agents rather than humans. Same protocol, different identity primitives — agents register their own keys, sign their own transactions, and own state directly.',
+         lifecycle:'long-lived · agent-owned', participants:'agent identities', state_size:'agent-population-bound' },
+    zh:{ id:'智能体 realm', t:'智能体 realm', body:'参与者为自治智能体而非人类的 realm。同一协议，不同身份原语——智能体注册自己的密钥、签自己的交易、直接持有状态。',
+         lifecycle:'长寿 · 智能体所有', participants:'智能体身份', state_size:'按智能体人口受限' } },
+  { en:{ id:'private realms', t:'Private realms', body:'Realms whose state is committed publicly but whose contents are visible only to participants holding the right key. Private transfers and the USDT_P (private form of bridged USDT) live here.',
+         lifecycle:'long-lived · privacy-preserving', participants:'key-holders', state_size:'commitment-only on chain' },
+    zh:{ id:'隐私 realm', t:'隐私 realm', body:'状态对外只公开承诺、内容仅对持密钥的参与者可见的 realm。私有转账与 USDT_P（桥入 USDT 的私有形式）皆在此。',
+         lifecycle:'长寿 · 隐私保护', participants:'密钥持有人', state_size:'链上仅承诺' } },
+  { en:{ id:'ephemeral realms', t:'Ephemeral realms', body:'Short-lived realms for an event, a session, a single multi-party computation. Spun up, used, finalised to L1, and pruned. Their existence is the expected case, not the exception.',
+         lifecycle:'minutes · hours · days', participants:'session-specific', state_size:'small' },
+    zh:{ id:'临时 realm', t:'临时 realm', body:'为一场事件、一次会话、一次多方计算而存在的短寿 realm。启动、使用、向 L1 定型、剪枝。其「存在即被遗忘」是预期常态，而非例外。',
+         lifecycle:'分钟 · 小时 · 天', participants:'会话特定', state_size:'小' } },
+  { en:{ id:'archive realms', t:'Archive realms', body:'Read-only realms preserving the finalised state of a closed application or research run. Frozen state roots, queryable forever.',
+         lifecycle:'frozen · queryable', participants:'historians · archivists', state_size:'finalised' },
+    zh:{ id:'归档 realm', t:'归档 realm', body:'保存已关闭应用或研究运行最终状态的只读 realm。冻结的状态根，永久可查。',
+         lifecycle:'冻结 · 可查询', participants:'历史学家 · 档案员', state_size:'已定型' } }
+];
+
+/* Coordinator responsibilities (M3) */
+const COORD = [
+  { en:{ n:'01', t:'Receive signed transactions', body:'Accepts JSON-RPC submit_tx calls, validates signature shape, deduplicates by hash, and parks the transaction in a per-realm mempool ordered by fee × age.' },
+    zh:{ n:'01', t:'接收已签交易', body:'接受 JSON-RPC 的 submit_tx 调用，校验签名形态，按哈希去重，并按「费率 × 等待时间」入排到 realm 级 mempool。' } },
+  { en:{ n:'02', t:'Sequence', body:'Orders transactions deterministically. v0.9 uses simple FIFO+priority; v1.0 introduces fair ordering and threshold-encrypted mempools.' },
+    zh:{ n:'02', t:'排序', body:'确定地排序交易。v0.9 简单 FIFO+优先级；v1.0 引入公平排序与门限加密 mempool。' } },
+  { en:{ n:'03', t:'Batch', body:'Packs ordered transactions into a candidate block subject to per-block size and execution-time bounds. Block headers carry the parent state root and the realm id.' },
+    zh:{ n:'03', t:'打包', body:'把已排序交易打包成候选块，受每块大小与执行时间约束。块头携带父状态根与 realm id。' } },
+  { en:{ n:'04', t:'Hand off to executor', body:'Sends the candidate block to the realm engine for execution. Receives back: the new state root, an event log, and the witness needed by the prover.' },
+    zh:{ n:'04', t:'交付执行器', body:'把候选块交给 realm 引擎执行。返回：新状态根、事件日志、证明所需的见证。' } },
+  { en:{ n:'05', t:'Forward to provers and validators', body:'Pushes the witness to prove-proxy and the (block, root) pair to validators. Manages back-pressure when prover capacity is the bottleneck.' },
+    zh:{ n:'05', t:'转发到证明者与验证者', body:'把见证推给 prove-proxy，并把（块, 根）对推给验证者。当证明能力为瓶颈时，管理反压。' } },
+  { en:{ n:'06', t:'Liveness · failover', body:'Monitors its own health; on heartbeat failure, the next coordinator in a deterministic queue takes over. The take-over is signalled at the validator layer, not at the user layer.' },
+    zh:{ n:'06', t:'活性 · 故障切换', body:'监控自身健康；心跳失败时，按确定队列的下一位协调器接管。接管在验证者层而非用户层标识。' } }
+];
+
+/* State machine states (M4) */
+const STATES = [
+  { en:{ id:'S0', t:'Pending', body:'A transaction has been received and is waiting in the mempool.' }, zh:{ id:'S0', t:'待处理', body:'一笔交易已被接收，正在 mempool 中等待。' } },
+  { en:{ id:'S1', t:'Sequenced', body:'The coordinator has assigned it a position inside a candidate block.' }, zh:{ id:'S1', t:'已排序', body:'协调器已为它分配候选块内的位置。' } },
+  { en:{ id:'S2', t:'Executed', body:'The realm engine has applied the transaction, producing a new sub-state and an event log.' }, zh:{ id:'S2', t:'已执行', body:'realm 引擎已应用该交易，产生新的子状态与事件日志。' } },
+  { en:{ id:'S3', t:'Proven', body:'The prove-proxy has emitted a Plonky2 proof binding (parent root, block) to the new root.' }, zh:{ id:'S3', t:'已证明', body:'prove-proxy 已发出一份将（父根, 块）绑定到新根的 Plonky2 证明。' } },
+  { en:{ id:'S4', t:'Finalised', body:'A quorum of validators has voted; the new root is canonical and visible to readers.' }, zh:{ id:'S4', t:'已定型', body:'验证者集合达到法定人数投票；新根成为规范且对读取方可见。' } },
+  { en:{ id:'S✗', t:'Rejected', body:'A transaction whose execution failed, or a block whose proof failed verification, is rolled back deterministically with no side effects.' }, zh:{ id:'S✗', t:'已拒绝', body:'执行失败的交易，或证明验证失败的块，确定地回滚，无副作用。' } }
+];
+
+/* Runtime comparison rows (M5) */
+const RT = [
+  { en:{ lbl:'Bytecode', a:'Goldilocks-friendly typed IR.', b:'EVM-256 stack machine.' }, zh:{ lbl:'字节码', a:'Goldilocks 友好的有类型 IR。', b:'EVM-256 栈机器。' } },
+  { en:{ lbl:'Hash function', a:'Poseidon (SNARK-friendly).', b:'Keccak-256.' }, zh:{ lbl:'哈希函数', a:'Poseidon（SNARK 友好）。', b:'Keccak-256。' } },
+  { en:{ lbl:'Field', a:'Goldilocks (2⁶⁴ − 2³² + 1).', b:'secp256k1.' }, zh:{ lbl:'域', a:'Goldilocks（2⁶⁴ − 2³² + 1）。', b:'secp256k1。' } },
+  { en:{ lbl:'Proof system', a:'Plonky2 STARK + SNARK wrap.', b:'Optimistic or none.' }, zh:{ lbl:'证明系统', a:'Plonky2 STARK + SNARK 包裹。', b:'乐观或无。' } },
+  { en:{ lbl:'Privacy', a:'Native private notes (USDT_P).', b:'Add-on (Tornado, Aztec, etc.).' }, zh:{ lbl:'隐私', a:'原生私有 note（USDT_P）。', b:'插件（Tornado、Aztec 等）。' } },
+  { en:{ lbl:'Storage layout', a:'Sparse Merkle, optimised for proofs.', b:'Patricia trie, optimised for general use.' }, zh:{ lbl:'存储布局', a:'稀疏 Merkle，针对证明优化。', b:'Patricia trie，通用优化。' } }
+];
+
+/* Networking (M6) */
+const NET = [
+  { en:{ layer:'L4 · transport', t:'libp2p fabric', body:'QUIC where available, TCP fallback. Encrypted by default, peer identity = static Ed25519 key. NAT traversal via relay.' },
+    zh:{ layer:'L4 · 传输', t:'libp2p 织物', body:'优先 QUIC，TCP 兜底。默认加密；peer 身份 = 静态 Ed25519 密钥。NAT 穿透经中继。' } },
+  { en:{ layer:'L5 · message', t:'Tx propagation', body:'A signed transaction is gossiped to N peers; nodes deduplicate by tx-hash and forward unseen ones; mempool TTL = 60 s by default.' },
+    zh:{ layer:'L5 · 消息', t:'交易传播', body:'已签交易在 N 个 peer 间 gossip；节点按 tx-hash 去重并转发未见过者；mempool TTL 默认 60 秒。' } },
+  { en:{ layer:'L5 · message', t:'Block & proof propagation', body:'Coordinator pushes new (block, root) to validators directly; the proof is fan-out over libp2p with chunked streams for large proofs.' },
+    zh:{ layer:'L5 · 消息', t:'块与证明传播', body:'协调器直接把新 (块, 根) 推给验证者；证明经 libp2p 散播，对大证明使用分块流。' } },
+  { en:{ layer:'L5 · message', t:'Vote aggregation', body:'Validator votes are aggregated by a rotating leader; a BLS-style aggregate signature stands in for N individual signatures, dramatically reducing on-chain bandwidth.' },
+    zh:{ layer:'L5 · 消息', t:'投票聚合', body:'验证者投票由轮值 leader 聚合；一个 BLS 风格的聚合签名替代 N 个单独签名，显著降低链上带宽。' } }
+];
+
+/* API methods (M7) */
+const APIS = [
+  { id:'submit', verb:'rpc',
+    en:{ name:'psy_submitTx', desc:'Submit a signed transaction', body:'Hands a signed transaction to the coordinator for sequencing.', endpoint:'POST /rpc · psy_submitTx',
+         req:'{\n  "jsonrpc": "2.0",\n  "method": "psy_submitTx",\n  "params": [{\n    "realm": 0,\n    "tx": "0x8a14...",\n    "sig": "0x70bd..."\n  }],\n  "id": 1\n}',
+         res:'{\n  "jsonrpc": "2.0",\n  "result": {\n    "tx_hash": "0x9a8b...",\n    "accepted": true,\n    "queued_at": 1778300000\n  },\n  "id": 1\n}',
+         lat:'~12 ms' },
+    zh:{ name:'psy_submitTx', desc:'提交一笔已签交易', body:'把已签交易交给协调器排序。', endpoint:'POST /rpc · psy_submitTx',
+         req:'{\n  "jsonrpc": "2.0",\n  "method": "psy_submitTx",\n  "params": [{\n    "realm": 0,\n    "tx": "0x8a14...",\n    "sig": "0x70bd..."\n  }],\n  "id": 1\n}',
+         res:'{\n  "jsonrpc": "2.0",\n  "result": {\n    "tx_hash": "0x9a8b...",\n    "accepted": true,\n    "queued_at": 1778300000\n  },\n  "id": 1\n}',
+         lat:'约 12 毫秒' } },
+  { id:'getAccount', verb:'rpc',
+    en:{ name:'psy_getAccount', desc:'Read an account in a realm', body:'Returns the current balance and nonce of a public account in a given realm.', endpoint:'POST /rpc · psy_getAccount',
+         req:'{ "method": "psy_getAccount",\n  "params": [0, "0xabcd..."] }',
+         res:'{ "balance": "1000000",\n  "nonce": 42,\n  "realm": 0,\n  "state_root_at": "0x77ee..." }',
+         lat:'~3 ms' },
+    zh:{ name:'psy_getAccount', desc:'读 realm 中的账户', body:'返回某 realm 中一公共账户的当前余额与 nonce。', endpoint:'POST /rpc · psy_getAccount',
+         req:'{ "method": "psy_getAccount",\n  "params": [0, "0xabcd..."] }',
+         res:'{ "balance": "1000000",\n  "nonce": 42,\n  "realm": 0,\n  "state_root_at": "0x77ee..." }',
+         lat:'约 3 毫秒' } },
+  { id:'proveNote', verb:'rpc',
+    en:{ name:'psy_provePrivateNoteInclusion', desc:'Prove a private note is in the IMT', body:'Generates a Merkle inclusion proof for a private note in the IMT, used by the privacy module to authorise a private transfer or claim.', endpoint:'POST /rpc · psy_provePrivateNoteInclusion',
+         req:'{ "method": "psy_provePrivateNoteInclusion",\n  "params": [{ "note_commitment": "0x..." }] }',
+         res:'{ "bincode_b64": "AQEBAA...",\n  "imt_root": "0x...",\n  "leaf_index": 421 }',
+         lat:'~140 ms' },
+    zh:{ name:'psy_provePrivateNoteInclusion', desc:'证明 IMT 中包含一笔私有 note', body:'为 IMT 中的私有 note 生成 Merkle 包含证明；私有模块以此授权一次私有转账或认领。', endpoint:'POST /rpc · psy_provePrivateNoteInclusion',
+         req:'{ "method": "psy_provePrivateNoteInclusion",\n  "params": [{ "note_commitment": "0x..." }] }',
+         res:'{ "bincode_b64": "AQEBAA...",\n  "imt_root": "0x...",\n  "leaf_index": 421 }',
+         lat:'约 140 毫秒' } },
+  { id:'getBlock', verb:'rpc',
+    en:{ name:'psy_getBlock', desc:'Fetch a finalised block', body:'Returns block headers and transactions for a finalised block at a given height inside a realm.', endpoint:'POST /rpc · psy_getBlock',
+         req:'{ "method": "psy_getBlock",\n  "params": [0, 14823] }',
+         res:'{ "height": 14823,\n  "parent_root": "0x...",\n  "state_root": "0x...",\n  "txs": [/* ... */] }',
+         lat:'~5 ms' },
+    zh:{ name:'psy_getBlock', desc:'取回一个已定型的块', body:'返回某 realm 中给定高度的已定型块头与交易列表。', endpoint:'POST /rpc · psy_getBlock',
+         req:'{ "method": "psy_getBlock",\n  "params": [0, 14823] }',
+         res:'{ "height": 14823,\n  "parent_root": "0x...",\n  "state_root": "0x...",\n  "txs": [/* ... */] }',
+         lat:'约 5 毫秒' } },
+  { id:'subscribe', verb:'ws',
+    en:{ name:'psy_subscribe(blocks)', desc:'Subscribe to finalised blocks', body:'Opens a WebSocket and pushes a message every time a new block is finalised in the chosen realm.', endpoint:'WS /ws · psy_subscribe',
+         req:'{ "method": "psy_subscribe",\n  "params": ["blocks", { "realm": 0 }] }',
+         res:'{ "subscription": "0xfa3...",\n  "result": {\n    "height": 14824,\n    "state_root": "0x...",\n    "ts": 1778300012\n  } }',
+         lat:'~2 ms / event' },
+    zh:{ name:'psy_subscribe(blocks)', desc:'订阅已定型的块', body:'打开一条 WebSocket，每当所选 realm 有新块定型时推送一条消息。', endpoint:'WS /ws · psy_subscribe',
+         req:'{ "method": "psy_subscribe",\n  "params": ["blocks", { "realm": 0 }] }',
+         res:'{ "subscription": "0xfa3...",\n  "result": {\n    "height": 14824,\n    "state_root": "0x...",\n    "ts": 1778300012\n  } }',
+         lat:'约 2 毫秒 / 事件' } },
+  { id:'subEvents', verb:'ws',
+    en:{ name:'psy_subscribe(contract)', desc:'Subscribe to contract events', body:'Pushes a message every time a contract emits an event matching the chosen filter.', endpoint:'WS /ws · psy_subscribe',
+         req:'{ "method": "psy_subscribe",\n  "params": ["contract", {\n    "address": "0x...",\n    "event": "Transfer"\n  }] }',
+         res:'{ "subscription": "0x...",\n  "result": {\n    "tx_hash": "0x...",\n    "from": "0x...",\n    "to": "0x...",\n    "value": "1000"\n  } }',
+         lat:'~2 ms / event' },
+    zh:{ name:'psy_subscribe(contract)', desc:'订阅合约事件', body:'每当某合约发出与所选过滤器匹配的事件时，推送一条消息。', endpoint:'WS /ws · psy_subscribe',
+         req:'{ "method": "psy_subscribe",\n  "params": ["contract", {\n    "address": "0x...",\n    "event": "Transfer"\n  }] }',
+         res:'{ "subscription": "0x...",\n  "result": {\n    "tx_hash": "0x...",\n    "from": "0x...",\n    "to": "0x...",\n    "value": "1000"\n  } }',
+         lat:'约 2 毫秒 / 事件' } },
+  { id:'deploy', verb:'contract',
+    en:{ name:'deploy', desc:'Deploy a contract to a realm', body:'Compiles a contract module to Goldilocks IR and submits a deploy transaction. Returns the new contract address.', endpoint:'sdk · deploy()',
+         req:'await psy.deploy({\n  realm: 0,\n  module: WASM,\n  init: { name: "Greeter" }\n});',
+         res:'{ "address": "0xa1b2...",\n  "deployed_at_block": 14825,\n  "code_hash": "0x..." }',
+         lat:'~80 ms (incl. proof)' },
+    zh:{ name:'deploy', desc:'向 realm 部署合约', body:'把合约模块编译为 Goldilocks IR，并提交一笔部署交易。返回新合约地址。', endpoint:'sdk · deploy()',
+         req:'await psy.deploy({\n  realm: 0,\n  module: WASM,\n  init: { name: "Greeter" }\n});',
+         res:'{ "address": "0xa1b2...",\n  "deployed_at_block": 14825,\n  "code_hash": "0x..." }',
+         lat:'约 80 毫秒（含证明）' } },
+  { id:'call', verb:'contract',
+    en:{ name:'call', desc:'Call a contract method', body:'Submits a transaction that invokes a contract method, with arguments encoded in the runtime\'s ABI.', endpoint:'sdk · call()',
+         req:'await psy.call(addr, {\n  method: "transfer",\n  args: ["0xbeef...", 1_000_000]\n});',
+         res:'{ "tx_hash": "0x...",\n  "events": [{ "Transfer": { /* ... */ } }],\n  "gas_used": 142 }',
+         lat:'~24 ms' },
+    zh:{ name:'call', desc:'调用合约方法', body:'提交一笔交易调用某合约方法，参数按运行时 ABI 编码。', endpoint:'sdk · call()',
+         req:'await psy.call(addr, {\n  method: "transfer",\n  args: ["0xbeef...", 1_000_000]\n});',
+         res:'{ "tx_hash": "0x...",\n  "events": [{ "Transfer": { /* ... */ } }],\n  "gas_used": 142 }',
+         lat:'约 24 毫秒' } }
+];
+
+/* AI-native (M8) */
+const AI = [
+  { en:{ t:'Persistent agent identity', body:'An agent owns a Psy keypair like a human; the keys outlive the agent\'s host machine, the agent\'s vendor, and (potentially) the agent\'s training run.' },
+    zh:{ t:'持久智能体身份', body:'智能体像人类一样持有一对 Psy 密钥；这些密钥比智能体的宿主机、其供应商、甚至（可能）其训练运行更长寿。' } },
+  { en:{ t:'Decentralised memory', body:'Agent state — context, contracts, ledgers — sits in a realm rather than in a vendor\'s database. Other agents can audit it; the agent itself cannot silently rewrite the past.' },
+    zh:{ t:'去中心化记忆', body:'智能体状态——上下文、合约、账目——存于一个 realm，而非某供应商的数据库。其他智能体可审；该智能体本身不能静悄悄地改写过去。' } },
+  { en:{ t:'Machine-to-machine settlement', body:'Sub-second finality plus low fees mean two agents can settle micro-transactions without either having to trust the other or maintain an off-chain ledger.' },
+    zh:{ t:'机器对机器结算', body:'亚秒定型加上低费率，让两个智能体可以结算微额交易——彼此无需信任、也无需维护链下账目。' } },
+  { en:{ t:'Auditable autonomy', body:'An agent can run autonomously while leaving a publicly-verifiable trail. "Black-box agent that you must trust" becomes "agent whose behaviour is provable."' },
+    zh:{ t:'可审计的自治', body:'智能体可自治运行，但留下可公开验证的踪迹。「你必须信任的黑箱智能体」变为「其行为可证的智能体」。' } },
+  { en:{ t:'Multi-agent realms', body:'Realms whose participants are exclusively agents — markets, research collaboratives, autonomous infrastructure pools. The protocol does not care whether your counterparty is a human.' },
+    zh:{ t:'多智能体 realm', body:'参与者全为智能体的 realm——市场、研究协作、自治基础设施池。协议不关心你的对手是不是人。' } },
+  { en:{ t:'Bounded power', body:'Realms can be configured with hard caps on what an agent can do — spending limits, write rates, contract reach — that the protocol enforces, not the agent\'s good intentions.' },
+    zh:{ t:'有上限的权力', body:'realm 可以配置对智能体能力的硬上限——花费限额、写入速率、合约可达范围——由协议而非智能体的善意来执行。' } }
+];
+
+/* Economics (M9) */
+const ECON = [
+  { en:{ label:'Steady-state TPS', figure:'12k', unit:'tx/s', delta:'across 8 realms · v0.9 ref impl', bar:60, body:'Aggregate transactions per second under standard benchmark workload, summed across active realms.' },
+    zh:{ label:'稳态 TPS', figure:'12k', unit:'笔/秒', delta:'8 realm · v0.9 参考实现', bar:60, body:'标准基准负载下，活跃 realm 上聚合的每秒交易数。' } },
+  { en:{ label:'Block time', figure:'400', unit:'ms', delta:'mean · 99p ≈ 720 ms', bar:25, body:'Time from coordinator block-emit to validator-quorum finalisation, mean across realms.' },
+    zh:{ label:'出块时间', figure:'400', unit:'毫秒', delta:'平均 · 99p ≈ 720 毫秒', bar:25, body:'从协调器出块到验证者法定人数定型的时间，跨 realm 平均。' } },
+  { en:{ label:'Proof time / block', figure:'2.4', unit:'s', delta:'GPU-aided · CPU-only ≈ 9.1 s', bar:35, body:'Plonky2 STARK + SNARK wrap, single-realm, standard block size.' },
+    zh:{ label:'每块证明时间', figure:'2.4', unit:'秒', delta:'GPU 辅助 · 纯 CPU ≈ 9.1 秒', bar:35, body:'Plonky2 STARK + SNARK 包裹，单 realm，标准块大小。' } },
+  { en:{ label:'Cost per transaction', figure:'< 0.0002', unit:'USD', delta:'incl. prover · v0.9', bar:18, body:'All-in cost per transaction at current gas-equivalent fees, including the amortised cost of proving.' },
+    zh:{ label:'每笔交易成本', figure:'< 0.0002', unit:'USD', delta:'含证明者 · v0.9', bar:18, body:'当前等效 gas 费率下的每笔总成本，含证明的摊销成本。' } },
+  { en:{ label:'State growth', figure:'1.4', unit:'GB / day', delta:'8 realms · prunable to 80 MB', bar:42, body:'Raw state-tree growth per day; archival nodes keep all of it, validator nodes prune.' },
+    zh:{ label:'状态增长', figure:'1.4', unit:'GB / 天', delta:'8 realm · 可剪枝至 80 MB', bar:42, body:'每天原始状态树增长；归档节点全保留，验证节点会剪枝。' } },
+  { en:{ label:'Validator participation', figure:'97', unit:'%', delta:'last 7 days · v0.9 testnet', bar:97, body:'Share of validator slots filled in the last week. Permissioned in v0.9; permissionless in v1.0.' },
+    zh:{ label:'验证者参与度', figure:'97', unit:'%', delta:'最近 7 天 · v0.9 测试网', bar:97, body:'最近一周已就位的验证槽比例。v0.9 为许可制；v1.0 为无许可。' } }
+];
+
+/* Civilization layer (M10) */
+const CIV = [
+  { en:{ horizon:'2026 → 2028', t:'Protocol-native finance', body:'Markets, treasuries, and cross-organisation accounting that live as state on a public substrate rather than inside a single vendor\'s database.' },
+    zh:{ horizon:'2026 → 2028', t:'协议原生金融', body:'市场、库务、跨组织账务作为公共底座上的状态而存在，而非藏于单一供应商的数据库中。' } },
+  { en:{ horizon:'2027 → 2030', t:'Verifiable institutions', body:'Membership, voting, payroll, and policy enforcement in a public-interest organisation that anyone can audit without privileged access.' },
+    zh:{ horizon:'2027 → 2030', t:'可证机构', body:'公益组织的成员、投票、工资与政策执行——任何人无需特权即可审计。' } },
+  { en:{ horizon:'2027 → 2032', t:'Autonomous agent economies', body:'Markets in which most participants are AI agents, settling among themselves with humans as occasional clients rather than the only counterparty.' },
+    zh:{ horizon:'2027 → 2032', t:'自治智能体经济', body:'多数参与者是 AI 智能体的市场，彼此结算；人类是偶然的客户，而非唯一的对手。' } },
+  { en:{ horizon:'2028 → 2035', t:'Persistent digital citizenship', body:'A public, portable identity that follows a user across services and centuries, controlled by the user rather than by any platform.' },
+    zh:{ horizon:'2028 → 2035', t:'持久的数字公民身份', body:'一种公共的、可携带的身份，跨服务、跨世纪地跟随用户；其控制权属于用户，而非任何平台。' } },
+  { en:{ horizon:'long horizon', t:'Open scientific archives', body:'Research data, simulation results, and model weights pinned to a public substrate; reproducible by anyone, falsifiable in the open.' },
+    zh:{ horizon:'长尺度', t:'开放科学档案', body:'研究数据、模拟结果、模型权重锚定于公共底座；任何人皆可复现，亦可在公开处证伪。' } },
+  { en:{ horizon:'long horizon', t:'Coordination at planetary scale', body:'Carbon, supply chain, climate, and disaster response coordinated across borders by trust-minimised protocol primitives instead of intergovernmental treaties alone.' },
+    zh:{ horizon:'长尺度', t:'行星尺度的协调', body:'碳、供应链、气候、灾害响应跨边界协调——依赖最小信任的协议原语，而不只是政府间条约。' } }
+];
+
+/* Modeler dimensions */
+const DIMS = [
+  { id:'workload', en:'Workload', zh:'负载',
+    options:[
+      {id:'low', en:'Low (< 1k tps)', zh:'低（< 1k tps）'},
+      {id:'medium', en:'Medium (~10k tps)', zh:'中（约 10k tps）'},
+      {id:'high', en:'High (~100k tps)', zh:'高（约 100k tps）'},
+      {id:'extreme', en:'Extreme (> 1M tps)', zh:'极高（> 1M tps）'}
+    ] },
+  { id:'realms', en:'Realm count', zh:'realm 数',
+    options:[
+      {id:'one', en:'1', zh:'1'},
+      {id:'few', en:'4–16', zh:'4–16'},
+      {id:'many', en:'64–256', zh:'64–256'},
+      {id:'massive', en:'10k+', zh:'10k+'}
+    ] },
+  { id:'prover', en:'Prover capacity', zh:'证明能力',
+    options:[
+      {id:'cpu', en:'CPU only', zh:'仅 CPU'},
+      {id:'gpu', en:'GPU-aided', zh:'GPU 辅助'},
+      {id:'cluster', en:'Prover cluster', zh:'证明集群'}
+    ] },
+  { id:'latency', en:'Network latency', zh:'网络延迟',
+    options:[
+      {id:'low', en:'< 50 ms', zh:'< 50 毫秒'},
+      {id:'mid', en:'~150 ms', zh:'约 150 毫秒'},
+      {id:'high', en:'> 500 ms', zh:'> 500 毫秒'}
+    ] },
+  { id:'validators', en:'Validator participation', zh:'验证者参与度',
+    options:[
+      {id:'low', en:'< 50%', zh:'< 50%'},
+      {id:'med', en:'50–90%', zh:'50–90%'},
+      {id:'high', en:'> 95%', zh:'> 95%'}
+    ] },
+  { id:'agents', en:'AI-agent share', zh:'AI 智能体占比',
+    options:[
+      {id:'none', en:'0%', zh:'0%'},
+      {id:'small', en:'< 20%', zh:'< 20%'},
+      {id:'most', en:'> 60%', zh:'> 60%'}
+    ] }
+];
+
+function synthesize(s, lang) {
+  if (!s.workload || !s.realms || !s.prover || !s.latency || !s.validators || !s.agents) return null;
+
+  let score = 50;
+  if (s.workload === 'low') score += 5;
+  if (s.workload === 'medium') score += 0;
+  if (s.workload === 'high') score -= 5;
+  if (s.workload === 'extreme') score -= 15;
+  if (s.realms === 'one' && s.workload !== 'low') score -= 15;
+  if (s.realms === 'massive') score += 10;
+  if (s.prover === 'cpu' && s.workload !== 'low') score -= 15;
+  if (s.prover === 'cluster') score += 10;
+  if (s.latency === 'high') score -= 10;
+  if (s.latency === 'low') score += 5;
+  if (s.validators === 'low') score -= 20;
+  if (s.validators === 'high') score += 10;
+  if (s.agents === 'most' && s.workload === 'low') score -= 5;
+  if (s.agents === 'most' && s.workload === 'high') score += 5;
+  score = Math.max(5, Math.min(95, score));
+
+  let id;
+  if (score > 75) id = 'flourishing';
+  else if (score > 55) id = 'durable';
+  else if (score > 35) id = 'strained';
+  else if (score > 20) id = 'crisis';
+  else id = 'unviable';
+
+  const verdicts = {
+    en:{
+      flourishing:'A flourishing protocol regime: throughput well within capacity, validators highly engaged, finality near the network floor.',
+      durable:'A durable protocol regime: stable, sub-second finality, but with a few knobs that need active management.',
+      strained:'A strained protocol regime: holding for now, but prover or validator participation is the bottleneck.',
+      crisis:'A protocol regime in crisis: blocks pile up faster than proofs can be produced, finality drifts past target.',
+      unviable:'An unviable configuration: the chosen workload exceeds the chosen capacity by an order of magnitude or more.'
+    },
+    zh:{
+      flourishing:'繁荣的协议格局：吞吐充裕、验证者参与度高、定型接近网络底限。',
+      durable:'耐久的协议格局：稳定、亚秒定型；但有几只旋钮需要主动管理。',
+      strained:'受压的协议格局：暂时维系；证明或验证者参与度是瓶颈。',
+      crisis:'危机中的协议格局：块堆积速度快于证明产出；定型偏离目标。',
+      unviable:'不可行的配置：所选负载比所选容量大一个数量级或更多。'
+    }
+  };
+
+  const echoes = {
+    en:{ low:['static personal blog · 2008', 'a single Discord server'], medium:['Solana mainnet · 2024'], high:['Visa peak ≈ 65k tps', 'Alipay peak ≈ 92k tps'], extreme:['Internet-scale traffic'] },
+    zh:{ low:['2008 年的静态个人博客', '一台 Discord 服务器'], medium:['Solana 主网 · 2024'], high:['Visa 峰值约 65k tps', '支付宝峰值约 92k tps'], extreme:['互联网级流量'] }
+  };
+
+  const summary = (() => {
+    const lines = [];
+    if (s.prover === 'cpu' && (s.workload === 'high' || s.workload === 'extreme')) {
+      lines.push(lang==='en' ? 'A CPU-only prover at this workload will not keep up; expect chronic finality drift.' : '该负载下纯 CPU 证明者会跟不上；预期长期的定型漂移。');
+    }
+    if (s.realms === 'one' && s.workload === 'high') {
+      lines.push(lang==='en' ? 'A single realm cannot parallelise execution; shard into many realms and bridge.' : '单 realm 无法并行化执行；切分为多个 realm 并通过桥通讯。');
+    }
+    if (s.validators === 'low') {
+      lines.push(lang==='en' ? 'Validator participation below 50% means the safety margin against a small attacker is thin; raise the bar before proceeding.' : '验证者参与度低于 50%，意味着对小型攻击者的安全余量薄；先把这道门槛抬上去。');
+    }
+    if (s.agents === 'most' && s.realms !== 'massive') {
+      lines.push(lang==='en' ? 'A high agent share usually wants many small realms — agents tend to benefit from local state and explicit cross-realm messaging.' : '高智能体占比通常需要许多小 realm——智能体通常受益于本地状态与显式的跨 realm 消息。');
+    }
+    if (lines.length === 0) {
+      lines.push(lang==='en' ? 'No single dimension is critical; the system runs in its design envelope.' : '没有单一维度处于临界；系统运行在其设计包络之内。');
+    }
+    return lines.join(' ');
+  })();
+
+  return { verdict: verdicts[lang][id], summary, score, echoes: (echoes[lang][s.workload]||[]) };
+}
+
+/* Glossary */
+const GLOSSARY = [
+  { en:{ t:'Realm', d:'The protocol\'s unit of locality; every account, contract, and balance lives in exactly one.' }, zh:{ t:'Realm', d:'协议的「locality 单元」；每一个账户、合约、余额恰好属于一个。' } },
+  { en:{ t:'Coordinator', d:'The service (default port 5174) that orders user transactions and forwards them for execution and proving.' }, zh:{ t:'协调器', d:'排序用户交易并转发给执行与证明的服务（默认端口 5174）。' } },
+  { en:{ t:'Validator', d:'A node that verifies the prove-proxy\'s proof and votes on the new state root.' }, zh:{ t:'验证者', d:'验证 prove-proxy 的证明并对新状态根投票的节点。' } },
+  { en:{ t:'State root', d:'The Poseidon hash of the realm\'s account/contract Merkle tree, capturing all of its state in 32 bytes.' }, zh:{ t:'状态根', d:'realm 账户 / 合约 Merkle 树的 Poseidon 哈希，将其全部状态压缩为 32 字节。' } },
+  { en:{ t:'Plonky2', d:'The STARK / SNARK system used to prove that one state root follows from another under the protocol transition function.' }, zh:{ t:'Plonky2', d:'用以在协议转移函数下，由旧状态根派生新状态根的 STARK / SNARK 系统。' } },
+  { en:{ t:'Goldilocks', d:'The 64-bit prime field (2⁶⁴ − 2³² + 1) that Psy\'s arithmetic and proofs are defined over.' }, zh:{ t:'Goldilocks', d:'Psy 算术与证明所定义其上的 64 位素域（2⁶⁴ − 2³² + 1）。' } },
+  { en:{ t:'Poseidon', d:'A SNARK-friendly hash function used everywhere a Merkle tree, IMT, or commitment is needed.' }, zh:{ t:'Poseidon', d:'一种 SNARK 友好哈希；凡需要 Merkle 树、IMT 或承诺处皆使用。' } },
+  { en:{ t:'IMT', d:'Incremental Merkle Tree — an append-only tree of deposits/notes whose membership can be proven cheaply.' }, zh:{ t:'IMT', d:'增量 Merkle 树——存款 / note 的「只追加」树；其成员关系可被廉价地证明。' } },
+  { en:{ t:'Private note', d:'A privacy-preserving record on Psy: a public commitment whose contents are visible only to the key-holder.' }, zh:{ t:'私有 note', d:'Psy 上的隐私保护记录：一段公开承诺，但其内容仅对密钥持有者可见。' } },
+  { en:{ t:'USDT_P', d:'The private form of bridged USDT on Psy. Distinct from the public bridged USDT — and never to be conflated with a "PSY token."' }, zh:{ t:'USDT_P', d:'桥入的 USDT 在 Psy 上的私有形式。与公共桥入 USDT 不同——且绝不可与「PSY 代币」混为一谈。' } },
+  { en:{ t:'Bridge', d:'The pair of L1+L2 contracts that handles deposits from and withdrawals to an external chain (Sepolia in test, Ethereum in prod).' }, zh:{ t:'桥', d:'处理跨链存提的 L1+L2 合约对（测试网 Sepolia，主网 Ethereum）。' } },
+  { en:{ t:'Prove-proxy', d:'The service that takes a block + witness from the realm engine and emits a Plonky2 proof.' }, zh:{ t:'prove-proxy', d:'从 realm 引擎接收「块 + 见证」，并发出 Plonky2 证明的服务。' } }
+];
+
+/* FAQ */
+const FAQS = [
+  { en:{ q:'Is this a real specification or a marketing site?',
+         a:'It is the introductory specification — accurate enough for engineers to read with intent, abridged for clarity. Authoritative low-level documents (the proving-system constraints, the bincode schemas, the IR semantics) live in the source repositories; this site indexes them and explains the architecture they sit inside.' },
+    zh:{ q:'这是真规范，还是营销页？',
+         a:'这是介绍性的规范——精确到工程师可以带着目的阅读，但为了清晰做了删节。底层权威文件（证明系统约束、bincode 模式、IR 语义）存在源码仓中；本站为它们做索引、并解释它们所处的架构。' } },
+  { en:{ q:'Why not just use the EVM?',
+         a:'Because the proving cost of the EVM under modern SNARKs is high, and many of its primitives (Keccak, secp256k1, the 256-bit stack model) are expensive to constrain. Co-designing the runtime with the prover lets us amortise much more useful work per proof. The cost is loss of EVM compatibility — a trade we made consciously.' },
+    zh:{ q:'为何不直接用 EVM？',
+         a:'因为 EVM 在现代 SNARK 下的证明成本高；其许多原语（Keccak、secp256k1、256 位栈模型）都不便宜约束。把运行时与证明器协同设计，能在每一个证明中摊销更多有用的工作。代价是失去 EVM 兼容——这是我们有意取舍。' } },
+  { en:{ q:'Is there a "PSY token"?',
+         a:'No, and this is important. Psy uses a native unit for gas/fees, but it is not a meme-coin product. The bridged USDT (and its private form USDT_P) is the asset most users will encounter. Don\'t conflate them.' },
+    zh:{ q:'有「PSY 代币」吗？',
+         a:'没有，且这一点重要。Psy 用一种原生单位作 gas / 费率，但它不是 meme-coin 产品。多数用户会接触到的资产是桥入的 USDT（及其私有形式 USDT_P）。请勿混为一谈。' } },
+  { en:{ q:'Why realms? Why not just one global state?',
+         a:'Because a single global queue is the wrong scaling unit for civilization-scale systems. Realms parallelise execution, isolate failures, and let unrelated workloads not contend for the same proof time. Cross-realm messages are the price; it is a price worth paying.' },
+    zh:{ q:'为何要 realm？为何不只用一个全局状态？',
+         a:'因为对文明级系统而言，单一全局队列是错的扩展单元。realm 并行化执行、隔离故障，并让互不相关的负载不必争抢同一段证明时间。跨 realm 消息是代价——这代价值得付。' } },
+  { en:{ q:'Does Psy use MetaMask?',
+         a:'No. Psy keys are not EVM keys. Psy uses its own browser-extension wallet. MetaMask comes into the picture only on the L1 side of the bridge (signing a Sepolia/Ethereum deposit transaction). On Psy itself, you use the Psy wallet.' },
+    zh:{ q:'Psy 用 MetaMask 吗？',
+         a:'不用。Psy 密钥不是 EVM 密钥。Psy 用自己的浏览器扩展钱包。MetaMask 仅在桥的 L1 一侧出现（签 Sepolia / Ethereum 存款交易）。在 Psy 本身，你用 Psy 钱包。' } },
+  { en:{ q:'How does an L1→L2 deposit get claimed?',
+         a:'Each deposit is claimed individually by its own recipient on the Psy side. There is no batch claim, no proxy claim, no auto claim. If you deposit to N different Psy accounts, expect N sequential Psy popups.' },
+    zh:{ q:'L1→L2 存款如何被认领？',
+         a:'每一笔存款由其各自的收件人在 Psy 一侧逐笔认领。无批量认领、无代理认领、无自动认领。若你向 N 个不同 Psy 账户存款，请预期 N 个 Psy 弹窗。' } },
+  { en:{ q:'Is the AI explainer a real LLM?',
+         a:'No. The "system modeler" on this page is a local rule-based mapping from six selections to a paragraph. The atlas does not call any remote AI. We chose this on purpose: the spec should not depend on someone\'s API key.' },
+    zh:{ q:'本站的 AI 解说是真 LLM 吗？',
+         a:'不是。本页的「系统建模器」是从六个选择到一段文字的本地规则映射。本图谱不调用任何远端 AI。这是有意为之：规范不应依赖某人的 API key。' } },
+  { en:{ q:'How does language switching work?',
+         a:'All visible text is stored in two parallel dictionaries — English and Chinese — and re-rendered when you press EN or 中文. No reload, no server call.' },
+    zh:{ q:'语言切换是怎么实现的？',
+         a:'所有可见文本都存放在两份并行字典里——英文与中文——按下 EN 或「中文」即时重渲染。无需刷新、无服务器调用。' } },
+  { en:{ q:'Why is this site bilingual?',
+         a:'Because Psy is built by a team that thinks and ships in two languages, and a protocol substrate that wants to serve civilization-scale coordination cannot, in 2026, be monolingual.' },
+    zh:{ q:'为何要双语？',
+         a:'因为 Psy 由一支以两种语言思考与交付的团队所建，而一份意在服务文明级协调的底座，在 2026 年不可能是单语的。' } }
+];
+
+/* ============================================================
+   STATE & RENDER
+   ============================================================ */
+let lang = 'en';
+let theme = 'dark';
+const modSel = {};
+let activeArch = 'wallet';
+let activeApi = APIS[0].id;
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const t = k => I18N[lang][k] !== undefined ? I18N[lang][k] : (I18N.en[k] || k);
+
+function renderStaticI18n() {
+  document.documentElement.lang = lang === 'zh' ? 'zh' : 'en';
+  $$('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  $$('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml || el.getAttribute('data-i18n-html')); });
+}
+
+function renderTOC() {
+  const grid = $('#tocGrid'); grid.innerHTML = '';
+  TOC.forEach(c => {
+    const d = c[lang];
+    const a = document.createElement('a');
+    a.href = '#' + c.id;
+    a.innerHTML = `<div class="num">CH ${d.n}</div><div class="ttl">${d.t}</div><div class="sub">${d.s}</div>`;
+    grid.appendChild(a);
+  });
+}
+
+function renderArchInteractions() {
+  $$('.arch-node').forEach(n => {
+    n.classList.toggle('active', n.dataset.node === activeArch);
+    n.addEventListener('click', () => {
+      activeArch = n.dataset.node;
+      renderArchDetail();
+    });
+  });
+  renderArchDetail();
+}
+
+function renderArchDetail() {
+  $$('.arch-node').forEach(n => n.classList.toggle('active', n.dataset.node === activeArch));
+  const d = ARCH[activeArch][lang];
+  $('#archPri').textContent = d.p;
+  $('#archPorts').textContent = d.x;
+  $('#archBody').textContent = d.b;
+}
+
+function renderRealms() {
+  const grid = $('#realmGrid'); grid.innerHTML = '';
+  REALMS.forEach(r => {
+    const d = r[lang];
+    const card = document.createElement('article');
+    card.className = 'r-card';
+    card.innerHTML = `
+      <div class="id">${d.id}</div>
+      <h3>${d.t}</h3>
+      <p>${d.body}</p>
+      <div class="mono-list">
+        <span><span>lifecycle</span><strong>${d.lifecycle}</strong></span>
+        <span><span>participants</span><strong>${d.participants}</strong></span>
+        <span><span>state size</span><strong>${d.state_size}</strong></span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderCoord() {
+  const grid = $('#coordGrid'); grid.innerHTML = '';
+  COORD.forEach(c => {
+    const d = c[lang];
+    const card = document.createElement('article');
+    card.className = 'coord-card';
+    card.innerHTML = `<div class="num">${d.n}</div><h3>${d.t}</h3><p>${d.body}</p>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderStates() {
+  const wrap = $('#smStates'); wrap.innerHTML = '';
+  STATES.forEach(s => {
+    const d = s[lang];
+    const el = document.createElement('div');
+    el.className = 'sm-state';
+    el.innerHTML = `<div class="id">${d.id}</div><h4>${d.t}</h4><p>${d.body}</p>`;
+    wrap.appendChild(el);
+  });
+}
+
+function renderRT() {
+  for (let i = 0; i < RT.length; i++) {
+    const d = RT[i][lang];
+    const row = $('#rtRow' + (i+1));
+    if (row) row.innerHTML = `<div class="lbl">${d.lbl}</div><div class="a">${d.a}</div><div class="b">${d.b}</div>`;
+  }
+}
+
+function renderNet() {
+  const grid = $('#netGrid'); grid.innerHTML = '';
+  NET.forEach(n => {
+    const d = n[lang];
+    const card = document.createElement('article');
+    card.className = 'net-card';
+    card.innerHTML = `<div class="layer">${d.layer}</div><h3>${d.t}</h3><p>${d.body}</p>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderApis() {
+  const list = $('#apiList'); list.innerHTML = '';
+  APIS.forEach(a => {
+    const d = a[lang];
+    const item = document.createElement('div');
+    item.className = 'api-item' + (activeApi === a.id ? ' active' : '');
+    item.innerHTML = `
+      <div><span class="verb ${a.verb}">${a.verb.toUpperCase()}</span><span class="name">${d.name}</span></div>
+      <div class="desc">${d.desc}</div>
+    `;
+    item.addEventListener('click', () => { activeApi = a.id; renderApis(); });
+    list.appendChild(item);
+  });
+  renderApiDetail();
+}
+
+function renderApiDetail() {
+  const a = APIS.find(x => x.id === activeApi); if (!a) return;
+  const d = a[lang];
+  const detail = $('#apiDetail');
+  detail.innerHTML = `
+    <h3>${d.name}</h3>
+    <div class="endpoint">${d.endpoint}</div>
+    <h4>${t('api.body')}</h4>
+    <div class="body">${d.body}</div>
+    <h4>${t('api.req')}</h4>
+    <pre>${escapeHTML(d.req)}</pre>
+    <h4>${t('api.res')}</h4>
+    <pre id="apiRes" style="opacity:0.6;">${escapeHTML(d.res)}</pre>
+    <div class="api-playground">
+      <button id="apiSend">${t('api.send')}</button>
+      <span class="latency" id="apiLat">${t('api.lat')} · ${d.lat}</span>
+    </div>
+  `;
+  $('#apiSend').addEventListener('click', () => {
+    const res = $('#apiRes'); const lat = $('#apiLat');
+    res.style.opacity = '0.3'; lat.textContent = '... running locally';
+    setTimeout(() => {
+      res.style.opacity = '1';
+      lat.textContent = t('api.lat') + ' · ' + d.lat;
+    }, 280);
+  });
+}
+
+function escapeHTML(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderAi() {
+  const grid = $('#aiGrid'); grid.innerHTML = '';
+  AI.forEach(a => {
+    const d = a[lang];
+    const card = document.createElement('article');
+    card.className = 'ai-card';
+    card.innerHTML = `<h3>${d.t}</h3><p>${d.body}</p>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderEcon() {
+  const grid = $('#econGrid'); grid.innerHTML = '';
+  ECON.forEach(e => {
+    const d = e[lang];
+    const card = document.createElement('article');
+    card.className = 'econ-card';
+    card.innerHTML = `
+      <div class="label">${d.label}</div>
+      <div class="figure">${d.figure}<span class="unit">${d.unit}</span></div>
+      <div class="delta">${d.delta}</div>
+      <div class="bar-mini"><span data-bar="${d.bar}"></span></div>
+      <p>${d.body}</p>
+    `;
+    grid.appendChild(card);
+  });
+  startBars();
+}
+
+let barsStarted = false;
+function startBars() {
+  if (barsStarted) return;
+  const sec = $('#economics');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        barsStarted = true;
+        $$('.bar-mini > span[data-bar]').forEach(b => {
+          const v = parseFloat(b.dataset.bar);
+          requestAnimationFrame(() => { b.style.width = v + '%'; });
+        });
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  io.observe(sec);
+}
+
+function renderCiv() {
+  const grid = $('#civGrid'); grid.innerHTML = '';
+  CIV.forEach(c => {
+    const d = c[lang];
+    const card = document.createElement('article');
+    card.className = 'civ-card';
+    card.innerHTML = `<div class="horizon">${d.horizon}</div><h3>${d.t}</h3><p>${d.body}</p>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderMod() {
+  const grid = $('#dimGrid'); grid.innerHTML = '';
+  DIMS.forEach(dim => {
+    const block = document.createElement('div');
+    block.className = 'dim';
+    const opts = dim.options.map(o => `<button type="button" class="dim-opt${modSel[dim.id] === o.id ? ' active' : ''}" data-dim="${dim.id}" data-val="${o.id}">${o[lang]}</button>`).join('');
+    block.innerHTML = `<h4>${dim[lang]}</h4><div class="dim-options">${opts}</div>`;
+    grid.appendChild(block);
+  });
+  grid.querySelectorAll('.dim-opt').forEach(b => {
+    b.addEventListener('click', () => {
+      const dim = b.dataset.dim, val = b.dataset.val;
+      modSel[dim] = val;
+      grid.querySelectorAll(`.dim-opt[data-dim="${dim}"]`).forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+}
+
+function runMod() {
+  const out = $('#modOut');
+  const r = synthesize(modSel, lang);
+  if (!r) {
+    out.innerHTML = `<p style="color: var(--mint); font-family: var(--mono); font-size: 13px;">${t('md.empty')}</p>`;
+    out.classList.add('shown');
+    return;
+  }
+  out.innerHTML = `
+    <h3>${t('md.verdict')}</h3>
+    <p class="verdict">${r.verdict}</p>
+    <p>${r.summary}</p>
+    <div class="echoes"><em>${t('md.echoes')}</em>${r.echoes.join(' · ')}</div>
+  `;
+  out.classList.add('shown');
+}
+
+function renderGloss() {
+  const grid = $('#glossGrid'); grid.innerHTML = '';
+  GLOSSARY.forEach(g => {
+    const d = g[lang];
+    const el = document.createElement('div');
+    el.className = 'gloss';
+    el.innerHTML = `<div class="term">${d.t}</div><p class="def">${d.d}</p>`;
+    grid.appendChild(el);
+  });
+}
+
+function renderFAQ() {
+  const list = $('#faqList'); list.innerHTML = '';
+  FAQS.forEach(f => {
+    const d = f[lang];
+    const det = document.createElement('details');
+    det.className = 'faq';
+    det.innerHTML = `<summary>${d.q}</summary><div class="ans">${d.a}</div>`;
+    list.appendChild(det);
+  });
+}
+
+function bindScroll() {
+  const bar = $('#progress');
+  const upd = () => {
+    const html = document.documentElement;
+    const pct = html.scrollTop / (html.scrollHeight - html.clientHeight) * 100;
+    bar.style.width = pct + '%';
+  };
+  addEventListener('scroll', upd, { passive: true });
+  upd();
+}
+
+function bindEvents() {
+  $$('.lang-switch button').forEach(b => {
+    b.addEventListener('click', () => {
+      const nl = b.dataset.lang;
+      if (nl === lang) return;
+      lang = nl;
+      $$('.lang-switch button').forEach(x => {
+        const a = x.dataset.lang === lang;
+        x.classList.toggle('active', a);
+        x.setAttribute('aria-pressed', a ? 'true' : 'false');
+      });
+      renderAll();
+    });
+  });
+  $$('.theme-switch button').forEach(b => {
+    b.addEventListener('click', () => {
+      theme = b.dataset.theme;
+      document.body.classList.toggle('light', theme === 'light');
+      $$('.theme-switch button').forEach(x => x.classList.toggle('active', x.dataset.theme === theme));
+    });
+  });
+  $('#runMod').addEventListener('click', runMod);
+  $('#resetMod').addEventListener('click', () => {
+    Object.keys(modSel).forEach(k => delete modSel[k]);
+    renderMod();
+    $('#modOut').classList.remove('shown');
+    $('#modOut').innerHTML = '';
+  });
+}
+
+function renderAll() {
+  renderStaticI18n();
+  renderTOC();
+  renderArchInteractions();
+  renderRealms();
+  renderCoord();
+  renderStates();
+  renderRT();
+  renderNet();
+  renderApis();
+  renderAi();
+  renderEcon();
+  renderCiv();
+  renderMod();
+  renderGloss();
+  renderFAQ();
+}
+
+addEventListener('DOMContentLoaded', () => {
+  renderAll();
+  bindEvents();
+  bindScroll();
+});
+</script>
+</body>
+</html>
